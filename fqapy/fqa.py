@@ -59,11 +59,12 @@ def reconnaissance(tc):
         #    tl = [len(c) + 1 for c in sc.split(ci)]
         # symétrie (longueurs des paliers caractère isolé inclus)
         tl_ = [len(c_) + 1 for c_ in sc[:len(sc) - {True: 1, False: 0}[complet]].split(ci)]
+        # plus petit palier
         if 2 < len(tl_):
-            # plus petit palier interne
+            # plus petit palier interne (strictement)
             mini = min(tl_[1:-1])
         else:
-            # plus petit palier externe
+            # sinon plus petit palier externe
             mini = min(tl_)
         # translation
         g_ = 0
@@ -87,20 +88,27 @@ def reconnaissance(tc):
         ap, bp, rp = ap + p_ * bp, bp, rp
         return ap, bp, rp
 
+    # critère d'arrêt
+    # REMARQUE : peut être différent, 'if 1 == len(tc):' par exemple, mais ne donne pas toujours les mêmes résultats
+    #            bien que ceux-ci restent conforment dans la mesure ou ils représentent encore le même segment.
     if min(tc) == max(tc):
         a, b, r = tc[0], 1, 0
     else:
         tl, p, g, complement = reduction(tc)
+        # appels récursifs qui se terminent ci-dessus.
         a, b, r = reconnaissance(tl)
+        # les appels sont dépilés ici.
         a, b, r = restitution(a, b, r, p, g, complement)
     return a, b, r
 
 
 def codes(liste_codes, x0_=0, y0_=0):
-    # Se reporter à [3] pour les détails.
-    # Entrée : Un tableau d'entiers (codes).
-    #        : Les valeurs initiales x0 et y0 nulles par défaut.
-    # Sortie : La forme quasi affine correspondant aux codes et aux valeurs initiales fournies.
+    """Reconnaissance des codes.
+    Entrée : Un tableau d'entiers (codes).
+           : Les valeurs initiales x0 et y0 nulles par défaut.
+    Sortie : La forme quasi affine correspondant aux codes et aux valeurs initiales fournies.
+    Références : [3] pour les détails.
+    """
     tl = array.array('l', liste_codes)
     a, b, r = reconnaissance(tl)
     r += b * int(y0_) - a * int(x0_)
@@ -114,8 +122,8 @@ class Fqa:
         """Forme quasi affine : y = Fqa(a,b,r)(x) = [(a * x + r) / b]
         Entrée : les caractéristiques a, b, r de la forme quasi affine.
         Sortie : La forme quasi affine Fqa.
-        Erreur : Dès que l'un des paramètres a, b, r n'est pas un entier.
         """
+        # Erreur : Dès que l'un des paramètres a, b, r n'est pas un entier.
         # assert isinstance(a, int)
         # assert isinstance(b, int)
         # assert isinstance(r, int)
@@ -125,8 +133,8 @@ class Fqa:
     def __call__(self, n_):
         """Entrée : un entier n.
         Sortie : Fqa(a,b,r)(n) = [(a * n + r) / b]
-        Erreur : si le paramètre a n'est pas un nombre entier.
         """
+        # Erreur : si le paramètre a n'est pas un nombre entier.
         # assert isinstance(n_, int)
         n_ = int(n_)
         q_, _ = divent(self.a * n_ + self.r, self.b)
@@ -147,8 +155,8 @@ class Fqa:
         """divfqa est l'équivalent de la division entière de n par la forme quasi affine self.
             Entrée : Un nombre entier n.
             Sortie : Le "quotient" q ~ n // self et le "reste" r ~ (n % self).
-            Erreur : Si le paramètre n n'est pas un nombre entier.
         """
+        # Erreur : Si le paramètre n n'est pas un nombre entier.
         # assert isinstance(n_, int)
         n_ = int(n_)
         # equivalent (n // self).
@@ -187,22 +195,19 @@ class Base:
     def __call__(self, liste_entiers):
         """Base([n0, n1, ...]) = [t[0](n0)+t[1](n1)+...].
         Entrée : Une liste d'entiers représentant un nombre entier dans la base.
-        Sortie : Le nombre entier représenté par la liste.
-        Erreur : Si le paramètre liste_entiers n'est pas définie ou s'il n'est pas une liste
-                ou encore, si l'un de ses éléments n'est pas un entier.
+        Sortie : Le nombre entier représenté par la liste dans la base.
+        Erreur : Si le paramètre liste_entiers a trop d'éléments.
         """
-        assert liste_entiers is not None
+        # assert liste_entiers is not None
         assert isinstance(liste_entiers, list)
-        if len(liste_entiers) > len(self.t):
-            raise ValueError("Le paramètre liste_entiers a trop d'éléments.")
-            # REMARQUE : si la taille de la liste d'entiers liste_entiers est inférieure à celle
-        #            de self.t, ce sont les termes les plus significatifs qui sont ignorés.
-        k = len(self.t) - len(liste_entiers)
+        assert len(self.t) >= len(liste_entiers)
+        # REMARQUE : si la taille de la liste d'entiers est inférieure à celle de self.t,
+        #            ce sont les formes les plus significatives qui sont ignorés.
+        tv = array.array('l', ([0] * (len(self.t) - len(liste_entiers)) + liste_entiers)[-len(self.t):])
         n_ = 0
         i = 0
-        for value in liste_entiers:
-            assert isinstance(value, int)
-            n_ += self.t[k + i](value)
+        for value in tv:
+            n_ += self.t[i](value)
             i += 1
         return n_
 
@@ -297,6 +302,20 @@ class Representation:
     def __str__(self):
         return "{}".format(self.liste_entiers)
 
+
+class _BaseTemps(Base):
+    """Base temps [jour, heures, minutes, secondes]."""
+
+    def __init__(self):
+        super().__init__([
+            Fqa(86400, 1, 0),
+            Fqa(3600, 1, 0),
+            Fqa(60, 1, 0),
+            Fqa(1, 1, 0),
+        ])
+
+
+BASE_TEMPS = _BaseTemps()
 
 if "__main__" == __name__:
 

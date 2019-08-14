@@ -7,7 +7,7 @@ from .calendar import *
 _JULIAN_EPOCH = 1721424
 
 
-class CalendarTest(unittest.TestCase):
+class CalendarTestCase(unittest.TestCase):
     """Série de tests du module calendar."""
 
     def test_signum(self):

@@ -537,20 +537,6 @@ class _CalendrierIsl(Calendrier):
 CALENDRIER_ISL = _CalendrierIsl()
 
 
-class _BaseTemps(Base):
-    """Base temps [jour, heures, minutes, secondes]."""
-
-    def __init__(self):
-        super().__init__([
-            Fqa(86400, 1, 0),
-            Fqa(3600, 1, 0),
-            Fqa(60, 1, 0),
-            Fqa(1, 1, 0),
-        ])
-
-
-BASE_TEMPS = _BaseTemps()
-
 if "__main__" == __name__:
 
     # 1721424.0
