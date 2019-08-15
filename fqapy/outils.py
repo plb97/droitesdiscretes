@@ -10,19 +10,14 @@ def egalf(a, b, prec=_PRECISION):
     Entrée : Deux nombres flottants a et b et facultativement la précision prec.
     Sortie : True si les deux nombres sont égaux à la précision près,
              False sinon.
-    Erreur : Dès que l'un des deux nombres ou la précision n'est pas un flottant
-             ou encore si la précision n'est pas strictement positive.
+    Erreur : Si la précision n'est pas strictement positive.
     """
-    if not isinstance(a, float):
-        raise TypeError("Le paramètre a n'est pas un flottant")
-    if not isinstance(b, float):
-        raise TypeError("Le paramètre b n'est pas un flottant")
-    if not isinstance(prec, float):
-        raise TypeError("Le paramètre prec n'est pas un flottant")
-    if 0. > prec:
-        raise ValueError("Précision négative ou nulle invalide")
-    c = b - a
-    return -prec < c < prec
+    # assert isinstance(a, float)
+    # assert isinstance(b, float)
+    # assert isinstance(prec, float)
+    a, b, prec = float(a), float(b), float(prec)
+    assert 0. < prec
+    return -prec < b - a < prec
 
 
 def divent(n, d):
@@ -64,10 +59,9 @@ def divent(n, d):
     # if not isinstance(d, int):
     #    raise TypeError("Le dénominateur d n'est pas un entier")
     n, d = int(n), int(d)
-    if 0 == d:
-        raise ValueError("Le dénominateur d est nul")
+    assert 0 != d
     q, r = n // d, n % d
-    # corriger le résultat si le reste r est négatif
+    # ajuster le résultat si le reste r est négatif
     if 0 > r:
         if 0 < d:
             q -= 1
@@ -79,7 +73,7 @@ def divent(n, d):
 
 
 def ent(f, sup=False):
-    """Partie entière de f.
+    """Partie entière de f (plancher si sup=False, plafond si sup=True).
     Entrée : Un nombre flottant ou entier f.
              Si sup = False alors la partie entière est inférieure ou égale à f et 0 <= r < 1.
              Si sup = True alors la partie entière est supérieure ou égale à f et 0 >= r > -1.
@@ -94,16 +88,14 @@ def ent(f, sup=False):
     """
     if isinstance(f, int):
         return f, 0.0
-    # if not isinstance(f, float):
-    #    raise TypeError("Le paramètre f n'est pas un flottant")
     f = float(f)
     q = int(f)
     r = f - q
-    # par défaut sup = False : donc partie entière <= f et r >= 0
+    # par défaut sup = False (floor) : donc partie entière <= f et r >= 0
     if 0. > r:
         q -= 1
         r += 1.0
-    # corriger si sup = True : donc partie entière >= f et r <= 0
+    # ajuster si sup = True (ceil) : donc partie entière >= f et r <= 0
     if 0. < r and sup:
         q += 1
         r -= 1.0
@@ -111,18 +103,18 @@ def ent(f, sup=False):
 
 
 def pgcd(a, b):
-    """PGCD plus grand commun diviseur des deux nombres a et b.
+    """PGCD plus grand commun diviseur des deux nombres a et b (toujours positif).
     Entrée : Deux nombres entiers a et b
     Sortie : Le PGCD.
     """
-    # if not isinstance(a, int):
-    #    raise TypeError("Le paramètre a n'est pas un entier")
-    # if not isinstance(b, int):
-    #    raise TypeError("Le paramètre b n'est pas un entier")
     a, b = int(a), int(b)
-    while b:
-        a, b = b, a % b
-    return a
+    assert 0 != a or 0 != b
+    g, r = a, b
+    while r:
+        g, r = r, g % r
+    if 0 > g:
+        g = -g
+    return g
 
 
 def pgcde(a, b):
@@ -139,30 +131,26 @@ def pgcde(a, b):
                et u est l'inverse de (a // PGCD) modulo (b // PGCD).
                Voir [2] pp. 20, 21.
     """
-    # if not isinstance(a, int):
-    #    raise TypeError("Le paramètre a n'est pas un entier")
-    # if not isinstance(b, int):
-    #    raise TypeError("Le paramètre b n'est pas un entier")
     a, b = int(a), int(b)
-    r, u, v, rp, up, vp = a, 1, 0, b, 0, 1
+    assert 0 != a or 0 != b
+    g, u, v, rp, up, vp = a, 1, 0, b, 0, 1
     while rp:
-        q = r // rp
-        r, u, v, rp, up, vp = rp, up, vp, r - q * rp, u - q * up, v - q * vp
-    return r, u, v
+        q = g // rp
+        g, u, v, rp, up, vp = rp, up, vp, g - q * rp, u - q * up, v - q * vp
+    if 0 > g:
+        g, u, v = -g, -u, -v
+    # a * u + b * v = g
+    return g, u, v
 
 
 def ppcm(a, b):
-    """PPCM plus petit commun multiple des deux nombres a et b.
+    """PPCM plus petit commun multiple des deux nombres a et b (toujours positif).
     Entrée : Deux nombres entiers a et b.
     Sortie : Le PPCM.
     Référence : https://fr.wikipedia.org/wiki/Plus_petit_commun_multiple
     """
-    # if not isinstance(a, int):
-    #    raise TypeError("Le paramètre a n'est pas un entier")
-    # if not isinstance(b, int):
-    #    raise TypeError("Le paramètre b n'est pas un entier")
     a, b = int(a), int(b)
-    if 0 == a or 0 == b:
-        return 0
-    else:
-        return (a * b) // pgcd(a, b)
+    p = (a * b) // pgcd(a, b)
+    if 0 > p:
+        p = -p
+    return p

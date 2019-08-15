@@ -24,16 +24,17 @@ class OutilsDiventTestCase(unittest.TestCase):
             Tdivent(n_=6, d=2, q=3, r=0),
             Tdivent(n_=2, d=6, q=0, r=2),
         ]
-        print("\ntest_divent")
+        # print()
+        # print("test_divent")
         for v_ in tt:
             q_, r_ = outils.divent(v_.n, v_.d)
-            print("v", v_, "obtenu :", "q", q_, "r", r_)
+            # print("v", v_, "obtenu :", "q", q_, "r", r_)
             self.assertTrue(0 <= r_ < abs(v_.d))
             self.assertEqual(v_.n, q_ * v_.d + r_)
             self.assertEqual(v_.q, q_)
             self.assertEqual(v_.r, r_)
 
-        with self.assertRaises(ValueError):
+        with self.assertRaises(AssertionError):
             outils.divent(3, 0)
 
 

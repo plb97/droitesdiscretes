@@ -26,10 +26,11 @@ class OutilsEntTestCase(unittest.TestCase):
             Tent(f_=1.0, q=1, r=0.0, sup=True),
             Tent(f_=-1.0, q=-1, r=0.0, sup=True),
         ]
-        print("\ntest_ent")
+        # print()
+        # print("test_ent")
         for v_ in tt:
             q_, r_ = outils.ent(v_.f, v_.sup)
-            print("v", v_, "obtenu :", "q", q_, "r", r_)
+            # print("v", v_, "obtenu :", "q", q_, "r", r_)
             if not v_.sup:
                 self.assertTrue(0.0 <= r_ < 1.0)
             else:
@@ -37,13 +38,6 @@ class OutilsEntTestCase(unittest.TestCase):
             self.assertTrue(outils.egalf(v_.f, q_ + r_))
             self.assertEqual(v_.q, q_)
             self.assertTrue(outils.egalf(v_.r, r_))
-
-        with self.assertRaises(TypeError):
-            outils.ent("1.2")
-            outils.egalf(1, 1.2)
-            outils.egalf(1.2, 1)
-        with self.assertRaises(ValueError):
-            outils.egalf(1.2, 1.2, prec=-1.0e-10)
 
 
 if __name__ == '__main__':

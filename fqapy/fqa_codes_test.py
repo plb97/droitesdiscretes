@@ -88,11 +88,11 @@ class FqaCodesTestCase(unittest.TestCase):
             Tcodes(x0_=0, y0_=0, c_=[1, 1, 1, 1, 1, 1, 1, 1],
                    ok=True, a_=1, b_=1, r_=0),
         ]
-        print("\ntest_codes")
+        # print()
+        # print("test_codes")
         for v_ in tt:
-            print("v", v_)
             f_ = fqa.codes(x0_=v_.x0, y0_=v_.y0, liste_codes=v_.c)
-            print("f", f_)
+            # print("v", v_, "f", f_)
             self.assertEqual(v_.f, f_)
 
 

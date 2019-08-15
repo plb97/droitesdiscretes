@@ -12,8 +12,8 @@ class CalendarTestCase(unittest.TestCase):
 
     def test_signum(self):
         """Référence [2] p. 15."""
-        print()
-        print("test_signum")
+        # print()
+        # print("test_signum")
         tt = [
             {"y": 1.2, "s": 1, },
             {"y": -12, "s": -1, },
@@ -21,11 +21,11 @@ class CalendarTestCase(unittest.TestCase):
             {"y": 0.0, "s": 0, },
             {"y": float('NaN'), "s": 0, },
         ]
-        print("\ntest_signum")
+        # print()
+        # print("test_signum")
         for v_ in tt:
-            print("v", v_)
             s = signum(v_["y"])
-            print("s", s)
+            # print("v", v_, "s", s)
             self.assertEqual(v_["s"], s)
 
         with self.assertRaises(TypeError):
@@ -33,8 +33,8 @@ class CalendarTestCase(unittest.TestCase):
 
     def test_amod(self):
         """Référence [2] p. 15."""
-        print()
-        print("test_amod")
+        # print()
+        # print("test_amod")
         tt = [
             {"x": 9, "y": 5, "r": 4, },
             {"x": -9, "y": 5, "r": 1, },
@@ -42,11 +42,9 @@ class CalendarTestCase(unittest.TestCase):
             {"x": -9, "y": -5, "r": -4, },
             {"x": 6, "y": 2, "r": 2, },
         ]
-        print("\ntest_signum")
         for v_ in tt:
-            print("v", v_)
             r = amod(v_["x"], v_["y"])
-            print("r", r)
+            # print("v", v_, "r", r)
             self.assertEqual(v_["r"], r)
 
         with self.assertRaises(TypeError):
@@ -58,8 +56,9 @@ class CalendarTestCase(unittest.TestCase):
 
     def test_kday_on_or_before(self):
         """Référence [2] p. 15."""
-        print()
-        print("test_kday_on_or_before")
+
+        # print()
+        # print("test_kday_on_or_before")
 
         def date(a_, m_, j_):
             return fixed_from_gregorian(GDate(m_, j_, a_))
@@ -73,19 +72,15 @@ class CalendarTestCase(unittest.TestCase):
             {"date": date(2019, 6, 27), "js": Jours.JEUDI, "k": Jours.SAMEDI, "kday": date(2019, 6, 22), },
             {"date": date(2019, 6, 27), "js": Jours.JEUDI, "k": Jours.DIMANCHE, "kday": date(2019, 6, 23), },
         ]
-        print("\ntest_kday_on_or_before")
         for v_ in tt:
-            print("v", v_)
             kday = kday_on_or_before(v_["date"], v_["k"])
+            # print("v", v_, "kday", kday)
             self.assertEqual(v_["kday"], kday)
-
-        # with self.assertRaises(TypeError):
-        #    pass
 
     def test_number_of_days_in_the_year_prior_year(self):
         """Référence : [2] p. 22."""
-        print()
-        print("test_number_of_days_in_the_year_prior_year")
+        # print()
+        # print("test_number_of_days_in_the_year_prior_year")
         tt = [
             #              c, l, delta, L
             {"cal": "Julian C.E.", "c": 4, "l": 1, "delta": 0, "L": 365, },
@@ -97,19 +92,17 @@ class CalendarTestCase(unittest.TestCase):
             # {"cal":"Persian (partial)","c":2816, "l":682, "delta":38, "L":365,},
             # {"cal":"Gregorian/Julian (approximate)","c":12, "l":7, "delta":11, "L":30,},
         ]
-        print("\ntest_number_of_days_in_the_year_prior_year")
         for v_ in tt:
-            print("v", v_)
             cal, c_, l, delta, L = v_["cal"], v_["c"], v_["l"], v_["delta"], v_["L"]
             # o = -delta % c + 1
             o = 1
-            print(cal, "c", c_, "l", l, "L", L, "delta", delta, o)
+            # print("v", v_, "cal", cal, "c", c_, "l", l, "L", L, "delta", delta, o)
             pn = number_of_days_in_the_year_prior_year(o, l, c_, L, delta)
             marque = ["", "*"]
             for y in range(o + 1, c_ + o + 1):
                 n_ = number_of_days_in_the_year_prior_year(y, l, c_, L, delta)
                 a_ = year_at_day(n_, l, c_, L, delta)
-                print("y", y - 1, "a", a_ - 1, "n", n_, n_ - pn, marque[(n_ - pn) % L])
+                # print("y", y - 1, "a", a_ - 1, "n", n_, n_ - pn, marque[(n_ - pn) % L])
                 pn = n_
                 self.assertEqual(y, a_)
             print()
@@ -119,9 +112,8 @@ class CalendarTestCase(unittest.TestCase):
 
     def test_iso_date(self):
         """Référence : [2] p. 22."""
-        print()
-        print("test_iso_date")
-        print()
+        # print()
+        # print("test_iso_date")
         tt = [
             {"g_date": GDate(1, 1, 2006), "iso_date": ISODate(52, 7, 2005), },
             {"g_date": GDate(1, 2, 2006), "iso_date": ISODate(1, 1, 2006), },
@@ -137,27 +129,27 @@ class CalendarTestCase(unittest.TestCase):
             {"g_date": GDate(1, 3, 2010), "iso_date": ISODate(53, 7, 2009), },
         ]
         for v_ in tt:
-            print()
+            # print()
             g_date = v_["g_date"]
             iso_date = v_["iso_date"]
-            print("g_date", g_date, "iso_date", iso_date)
+            # print("g_date", g_date, "iso_date", iso_date)
 
             fixed_g_date = fixed_from_gregorian(g_date)
             fixed_iso_date = fixed_from_iso(iso_date)
             self.assertEqual(fixed_g_date, fixed_iso_date)
 
             iso_g_date = iso_from_fixed(fixed_g_date)
-            print("fixed_g_date", fixed_g_date, "iso_g_date", iso_g_date)
+            # print("fixed_g_date", fixed_g_date, "iso_g_date", iso_g_date)
             g_iso_date = gregorian_from_fixed(fixed_iso_date)
-            print("fixed_iso_date", fixed_iso_date, "g_iso_date", g_iso_date)
+            # print("fixed_iso_date", fixed_iso_date, "g_iso_date", g_iso_date)
             self.assertEqual(g_date, g_iso_date)
             self.assertEqual(iso_date, iso_g_date)
 
     def test_julian_date(self):
         """Référence : [2] p. 14."""
-        print()
-        print("test_julian_date")
-        print(fixed_from_gregorian(GDate(12, 30, 0)), _JULIAN_EPOCH)
+        # print()
+        # print("test_julian_date")
+        # print(fixed_from_gregorian(GDate(12, 30, 0)), _JULIAN_EPOCH)
         tt = [
             {"g_date": GDate(11, 24.5, -4713), "j_date": JDate(1, 1.5, -4713), },
             {"g_date": GDate(9, 7, -3760), "j_date": JDate(10, 7, -3761), },
@@ -174,18 +166,18 @@ class CalendarTestCase(unittest.TestCase):
             {"g_date": GDate(3, 21, 1844), "j_date": JDate(3, 9, 1844), },
         ]
         for v_ in tt:
-            print()
+            # print()
             g_date = v_["g_date"]
             j_date = v_["j_date"]
-            print("g_date", g_date, "j_date", j_date)
+            # print("g_date", g_date, "j_date", j_date)
             fixed_g_date = fixed_from_gregorian(g_date)
             fixed_j_date = fixed_from_julian(j_date)
             self.assertEqual(fixed_g_date, fixed_j_date)
 
             j_g_date = julian_from_fixed(fixed_g_date)
-            print("fixed_g_date", fixed_g_date, "j_g_date", j_g_date)
+            # print("fixed_g_date", fixed_g_date, "j_g_date", j_g_date)
             g_j_date = gregorian_from_fixed(fixed_j_date)
-            print("fixed_j_date", fixed_j_date, "g_j_date", g_j_date, fixed_j_date - _JULIAN_EPOCH - 1)
+            # print("fixed_j_date", fixed_j_date, "g_j_date", g_j_date, fixed_j_date - _JULIAN_EPOCH - 1)
             self.assertEqual(g_date, g_j_date)
             self.assertEqual(j_date, j_g_date)
 
@@ -193,7 +185,7 @@ class CalendarTestCase(unittest.TestCase):
         self.assertEqual(gregorian_from_fixed(eastern_orthodox_christmas(2019)[0]), GDate(1, 7, 2019))
         self.assertEqual(gregorian_from_fixed(eastern_orthodox_christmas(2020)[0]), GDate(1, 7, 2020))
 
-        print()
+        # print()
         # https://www.vive-paques.com/paques/date-paques.htm (consulté en 2019)
         paques = [
             {"g_paques": GDate(4, 1, 2018), "j_paques": GDate(4, 8, 2018), "h_paques": GDate(3, 31, 2018), },
@@ -208,25 +200,25 @@ class CalendarTestCase(unittest.TestCase):
         for i_ in range(len(paques)):
             a_ = 2018 + i_
             g_e = gregorian_from_fixed(easter(a_))
-            print("easter({})".format(a_), g_e, paques[i_]["g_paques"])
+            # print("easter({})".format(a_), g_e, paques[i_]["g_paques"])
             j_e = gregorian_from_fixed(nicaean_rule_easter(a_))
-            print("nicaean rule({})".format(a_), j_e, paques[i_]["j_paques"])
+            # print("nicaean rule({})".format(a_), j_e, paques[i_]["j_paques"])
             self.assertEqual(g_e, paques[i_]["g_paques"])
             self.assertEqual(j_e, paques[i_]["j_paques"])
 
-        print()
+        # print()
         pentecotes = [GDate(6, 9, 2019), GDate(5, 31, 2020), GDate(5, 23, 2021), ]
         for i_ in range(len(pentecotes)):
             a_ = 2019 + i_
             g_p = gregorian_from_fixed(pentecost(a_))
-            print("pentecost({})".format(a_), g_p, pentecotes[i_])
+            # print("pentecost({})".format(a_), g_p, pentecotes[i_])
             self.assertEqual(g_p, pentecotes[i_])
 
     def test_coptic_date(self):
         """Référence : [2] pp. 57-58."""
         # https://www.timeanddate.com/holidays/egypt/coptic-christmas-day (consulté en 2019)
-        print()
-        print("test_coptic_date")
+        # print()
+        # print("test_coptic_date")
         tt = [
             {"year": 2015, "g_date": GDate(1, 7, 2015), },
             # {"year":2016, "g_date":GDate(1, 7, 2016),},
@@ -241,14 +233,13 @@ class CalendarTestCase(unittest.TestCase):
             {"year": 2025, "g_date": GDate(1, 7, 2025), },
         ]
         for v_ in tt:
-            print("v", v_)
             g_date = gregorian_from_fixed(coptic_christmas(v_["year"])[0])
-            print("year", v_["year"], coptic_leap_year(v_["year"]), "g_date", v_["g_date"], "->", g_date)
+            # print("v", v_, "year", v_["year"], coptic_leap_year(v_["year"]), "g_date", v_["g_date"], "->", g_date)
             self.assertEqual(g_date, v_["g_date"])
 
 
 if "__main__" == __name__:
-    print("calendar_test")
-    print("coptic epoch", fixed_from_julian(JDate(8, 29, 284)))
-    print("coptic_christmas(2019)", gregorian_from_fixed(coptic_christmas(2019)[0]))
+    # print("calendar_test")
+    # print("coptic epoch", fixed_from_julian(JDate(8, 29, 284)))
+    # print("coptic_christmas(2019)", gregorian_from_fixed(coptic_christmas(2019)[0]))
     unittest.main()

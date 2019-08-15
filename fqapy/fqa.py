@@ -36,7 +36,7 @@ def reconnaissance(tc):
             map(lambda c_: {True: str, False: lambda c__: "*"}[c_ in [0, 1]](c_), list(map(lambda c_: c_ - p_, tc_))))
         # En cas d'erreur, le dernier code peut être ignoré si c'est le plus petit
         if "*" in sc:
-            # suppression du dernier code si c'est le plus petit
+            # mise à l'écart du dernier code si c'est le plus petit
             if tc_[-1] == p_:
                 p_ = min(tc_[:-1])
                 sc = "".join(map(lambda c_: {True: str, False: lambda c__: "*"}[c_ in [0, 1]](c_),
@@ -157,8 +157,6 @@ class Fqa:
             Sortie : Le "quotient" q ~ n // self et le "reste" r ~ (n % self).
         """
         # Erreur : Si le paramètre n n'est pas un nombre entier.
-        # assert isinstance(n_, int)
-        n_ = int(n_)
         # equivalent (n // self).
         n_ = int(n_)
         q_, _ = divent(self.b * n_ + self.b - self.r - 1, self.a)
@@ -182,10 +180,9 @@ class Base:
     def __init__(self, liste_fqa):
         """Entrée : Une liste de formes quasi affines liste_fqa.
         Sortie : Une base.
-        Erreur : Si le paramètre liste_fqa n'est pas défini ou s'il n'est pas une liste 
-                 ou si l'un de ses éléments n'est pas une forme quasi affine.
+        Erreur : Si le paramètre liste_fqa n'est pas une liste de formes quasi affines.
         """
-        assert liste_fqa is not None
+        # assert liste_fqa is not None
         assert isinstance(liste_fqa, list)
         self.t = []
         for value in liste_fqa:
@@ -196,16 +193,16 @@ class Base:
         """Base([n0, n1, ...]) = [t[0](n0)+t[1](n1)+...].
         Entrée : Une liste d'entiers représentant un nombre entier dans la base.
         Sortie : Le nombre entier représenté par la liste dans la base.
-        Erreur : Si le paramètre liste_entiers a trop d'éléments.
+        Erreur : Si le paramètre liste_entiers n'est pas une liste d'entiers.
+                 Ou si le paramètre liste_entiers a trop d'éléments.
         """
         # assert liste_entiers is not None
         assert isinstance(liste_entiers, list)
         assert len(self.t) >= len(liste_entiers)
         # REMARQUE : si la taille de la liste d'entiers est inférieure à celle de self.t,
-        #            ce sont les formes les plus significatives qui sont ignorés.
-        tv = array.array('l', ([0] * (len(self.t) - len(liste_entiers)) + liste_entiers)[-len(self.t):])
-        n_ = 0
-        i = 0
+        #            ce sont les formes les plus significatives qui sont ignorées.
+        tv = array.array('l', ([0] * (len(self.t) - len(liste_entiers)) + liste_entiers))
+        i, n_ = 0, 0
         for value in tv:
             n_ += self.t[i](value)
             i += 1
@@ -223,7 +220,7 @@ class Base:
         return self.t[clef]
 
     def __setitem__(self, clef, valeur):
-        """Erreur : si la valeur n'est pas un entier."""
+        """Erreur : si la valeur n'est pas une forme quasi affine."""
         assert isinstance(valeur, Fqa)
         # assert isinstance(clef, int)
         self.t[clef] = valeur
@@ -246,16 +243,14 @@ class Base:
         return "{}".format(self.t)
 
     def inv(self, n_):
-        """Voir [1] pour les détails.
-        Entrée : Un nombre entier.
-        Sortie : Un tableau représentant le nombre dans la base.
-        Erreur : Si le paramètre n'est pas un nombre entier.
+        """Entrée : Un nombre entier.
+        Sortie : Un tableau d'entiers représentant le nombre dans la base.
+        Référence : [1] pour les détails.
         """
+        # Erreur : Si le paramètre n'est pas un nombre entier.
         # assert isinstance(n_, int)
-        n_ = int(n_)
-        r = n_
-        v = [0 for _ in range(len(self.t))]
-        i = 0
+        v = [0] * len(self.t)
+        i, r = 0, int(n_)
         for f_ in self.t:
             v[i], r = f_.divfqa(r)
             i += 1

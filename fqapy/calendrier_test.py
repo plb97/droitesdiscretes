@@ -46,14 +46,14 @@ class CalendrierTestCase(unittest.TestCase):
         tt = [
             {"jd": 2436116.31, "jj": 2436116.81}
         ]
-        print("\ntest_jour_julien")
+        # print()
+        # print("test_jour_julien")
         for v_ in tt:
-            print("v", v_)
-
+            # print("v", v_)
             jj = calendrier.EPOQUE_JJ + v_["jj"]
-            print("jj={} {}".format(jj, jj()))
+            # print("jj={} {}".format(jj, jj()))
             jd = calendrier.EPOQUE_JD + v_["jd"]
-            print("jd={} {}".format(jd, jd()))
+            # print("jd={} {}".format(jd, jd()))
             # Le nouveau jj va être un nombre
             jj = jj - calendrier.EPOQUE_JJ
             self.assertEqual(jj, v_["jj"])
@@ -61,22 +61,22 @@ class CalendrierTestCase(unittest.TestCase):
             jd = jd - calendrier.EPOQUE_JD
             self.assertEqual(jd, v_["jd"])
             jjp2 = calendrier.EPOQUE_JJ + v_["jj"] + 2
-            print("jjp2", jjp2, "jj", jj)
+            # print("jjp2", jjp2, "jj", jj)
             jjp2 = jjp2 - calendrier.EPOQUE_JJ
             self.assertTrue(calendrier.egalf(jjp2, jj + 2))
             jjm35 = (calendrier.EPOQUE_JJ + v_["jj"]) - 3.5
-            print("jjm35", jjm35, "jj", jj)
+            # print("jjm35", jjm35, "jj", jj)
             jjm35 = jjm35 - calendrier.EPOQUE_JJ
             self.assertTrue(calendrier.egalf(jjm35, jj - 3.5))
             jjp2 = calendrier.EPOQUE_JJ + v_["jj"]
-            print("jjp2", jjp2, "jj", jj)
+            # print("jjp2", jjp2, "jj", jj)
             jjp2 += 2
-            print("jjp2", jjp2, "jj", jj)
+            # print("jjp2", jjp2, "jj", jj)
             self.assertTrue(calendrier.egalf(jjp2 - calendrier.EPOQUE_JD, jd + 2))
             jjm35 = calendrier.EPOQUE_JJ + v_["jj"]
-            print("jjm35", jjm35, "jj", jj)
+            # print("jjm35", jjm35, "jj", jj)
             jjm35 -= 3.5
-            print("jjm35", jjm35, "jj", jj)
+            # print("jjm35", jjm35, "jj", jj)
             self.assertTrue(calendrier.egalf(jjm35 - calendrier.EPOQUE_JD, jd - 3.5))
             # évaluation faite de gauche à droite
             jj = calendrier.EPOQUE_JD + v_["jd"] - calendrier.EPOQUE_JJ
@@ -84,7 +84,7 @@ class CalendrierTestCase(unittest.TestCase):
             jjp5, jjm3 = jj + 5, jj - 3
             # différences
             dif = jjp5 - jjm3
-            print("jj", jj, "jjp5", jjp5, "jjm3", jjm3, "jjp5-jjm3", dif)
+            # print("jj", jj, "jjp5", jjp5, "jjm3", jjm3, "jjp5-jjm3", dif)
             self.assertEqual(dif, 8.0)
 
     # noinspection SpellCheckingInspection
@@ -99,12 +99,12 @@ class CalendrierTestCase(unittest.TestCase):
             Tcalend(j_=2457578, t_=0.75, y_=2016, m_=calendrier.Mois.JUILLET, d_=8.75, c_=c_, js_=calendrier.Jours.VENDREDI),
             Tcalend(j_=2299161, t_=0.0, y_=1582, m_=calendrier.Mois.OCTOBRE, d_=15.0, c_=c_, js_=calendrier.Jours.VENDREDI),
         ]
-        print("\ntest_calend_grégorien")
+        # print()
+        # print("test_calend_grégorien")
         for v_ in tt:
-            print("v", v_)
             jj = v_.dt()
             js = jj.jour_semaine()
-            print("jj", jj, js)
+            # print("v", v_, "jj", jj, js)
             # vp = jj.kjour_semaine_precedant(Jours.VENDREDI)
             # vpp = jj.kjour_semaine_plus_proche(Jours.VENDREDI)
             # vav = jj.kjour_semaine_avant(Jours.VENDREDI)
@@ -118,7 +118,7 @@ class CalendrierTestCase(unittest.TestCase):
             self.assertEqual(v_.jj, jj)
             self.assertEqual(v_.js, js)
             dt_ = c_.date(v_.jj)
-            print("dt", dt_)
+            # print("dt", dt_)
             self.assertEqual(v_.dt, dt_)
 
     def test_calend_julien(self):
@@ -130,16 +130,16 @@ class CalendrierTestCase(unittest.TestCase):
             Tcalend(j_=1842713, t_=0.75, y_=333, m_=calendrier.Mois.JANVIER, d_=27.75, c_=c_, js_=calendrier.Jours.SAMEDI),
             Tcalend(j_=2299160, t_=0.5, y_=1582, m_=calendrier.Mois.OCTOBRE, d_=4.5, c_=c_, js_=calendrier.Jours.JEUDI),
         ]
-        print("\ntest_calend_julien")
+        # print()
+        # print("test_calend_julien")
         for v_ in tt:
-            print("v", v_)
             jj = v_.dt()
             js = jj.jour_semaine()
-            print("jj", jj, "js", js)
+            # print("v", v_, "jj", jj, "js", js)
             self.assertEqual(v_.jj, jj)
             self.assertEqual(v_.js, js)
             dt_ = c_.date(v_.jj)
-            print("dt", dt_)
+            # print("dt", dt_)
             self.assertEqual(v_.dt, dt_)
 
     def test_calend_musulman(self):
@@ -153,16 +153,16 @@ class CalendrierTestCase(unittest.TestCase):
             # Tcalend(j=2457578, t=0.5, y=1437,m=Mois.CHAWWAL,d=2.5, c=CALENDRIER_ISL, js=Jours.ELJOMOA),
             Tcalend(j_=2457578, t_=0.5, y_=1437, m_=10, d_=2.5, c_=c_, js_=4),
         ]
-        print("\ntest_calend_musulman")
+        # print()
+        # print("test_calend_musulman")
         for v_ in tt:
-            print("v", v_)
             jj = v_.dt()
             js = jj.jour_semaine()
-            print("jj", jj, "js", js)
+            # print("v", v_, "jj", jj, "js", js)
             self.assertEqual(v_.jj, jj)
             self.assertEqual(v_.js, js)
             dt_ = c_.date(v_.jj)
-            print("dt", dt_)
+            # print("dt", dt_)
             self.assertEqual(v_.dt, dt_)
 
     def test_date(self):
@@ -170,12 +170,12 @@ class CalendrierTestCase(unittest.TestCase):
         tt = [
             {"date": calendrier.Date(2019, 6, 27, calendrier.CALENDRIER_GRE), "jj": calendrier.EPOQUE_JJ + 2458662},
         ]
-        print("\ntest_date")
+        # print()
+        # print("test_date")
         for v_ in tt:
-            print("v", v_)
             jj_ = v_["date"]()
             date_ = calendrier.CALENDRIER_GRE.date(jj_)
-            print("jj", jj_)
+            # print("v", v_, "jj", jj_)
             self.assertEqual(v_["jj"], jj_)
             self.assertEqual(calendrier.CALENDRIER_GRE, v_["date"].calendrier)
             self.assertEqual(v_["date"], date_)
@@ -183,8 +183,8 @@ class CalendrierTestCase(unittest.TestCase):
 
 if "__main__" == __name__:
 
-    print("EPOQUE_JUL - EPOQUE_JJ", calendrier.EPOQUE_JUL - calendrier.EPOQUE_JJ)
-    print("EPOQUE_COP - EPOQUE_JJ", calendrier.EPOQUE_COP - calendrier.EPOQUE_JJ)
-    print("EPOQUE_ETH - EPOQUE_JJ", calendrier.EPOQUE_ETH - calendrier.EPOQUE_JJ)
+    # print("EPOQUE_JUL - EPOQUE_JJ", calendrier.EPOQUE_JUL - calendrier.EPOQUE_JJ)
+    # print("EPOQUE_COP - EPOQUE_JJ", calendrier.EPOQUE_COP - calendrier.EPOQUE_JJ)
+    # print("EPOQUE_ETH - EPOQUE_JJ", calendrier.EPOQUE_ETH - calendrier.EPOQUE_JJ)
 
     unittest.main()

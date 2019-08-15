@@ -29,12 +29,12 @@ class FqaValeurTestCase(unittest.TestCase):
             # jour calendrier grégorien
             Tfqa(i_=8, n_=7, a_=1, b_=1, r_=-1),
         ]
-        print("\ntest_fqa_valeur")
+        # print()
+        # print("test_fqa_valeur")
         for v_ in tt:
-            print("v", v_)
             n_ = v_.f(v_.i)
             i_, r_ = v_.f.divfqa(n_)
-            print("v", v_, "obtenu :", "n", n_, "i", i_, "r", r_)
+            # print("v", v_, "obtenu :", "n", n_, "i", i_, "r", r_)
             self.assertEqual(v_.n, n_)
             self.assertEqual(v_.i, i_)
             self.assertEqual(0, r_)
