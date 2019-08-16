@@ -95,6 +95,9 @@ class FqaCodesTestCase(unittest.TestCase):
             # print("v", v_, "f", f_)
             self.assertEqual(v_.f, f_)
 
+        with self.assertRaises(AssertionError):
+            fqa.codes([31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31])
+
 
 if __name__ == '__main__':
     unittest.main()

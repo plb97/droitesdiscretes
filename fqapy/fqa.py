@@ -14,15 +14,15 @@ Bibliographie.
         disponible sur https://www.sciencedirect.com/science/article/pii/0304397593901219
 """
 import array
-from .outils import *
+from . import outils
 
 
-def reconnaissance(tc):
+def reconnaissance(liste_codes):
     # Entrée : Un tableau d'entiers (codes).
     # Sortie : Les caractéristiques a, b, r de la forme quasi affine.
     # Erreur : ValueError si les codes ne sont pas ceux d'un segment de droite discrète.
     # Références [3] et [5].
-    def reduction(tc_):
+    def reduction(lc):
         # Algorithme décrit dans [3] et [5].
         #
         # def cd(c):
@@ -30,19 +30,18 @@ def reconnaissance(tc):
         #    return str(c)
         # else:
         #    return "*"
-        p_ = min(tc_)
+        p_ = min(lc)
         # transvection
         sc = "".join(
-            map(lambda c_: {True: str, False: lambda c__: "*"}[c_ in [0, 1]](c_), list(map(lambda c_: c_ - p_, tc_))))
+            map(lambda c_: {True: str, False: lambda c__: "*"}[c_ in [0, 1]](c_), list(map(lambda c_: c_ - p_, lc))))
         # En cas d'erreur, le dernier code peut être ignoré si c'est le plus petit
         if "*" in sc:
             # mise à l'écart du dernier code si c'est le plus petit
-            if tc_[-1] == p_:
-                p_ = min(tc_[:-1])
+            if lc[-1] == p_:
+                p_ = min(lc[:-1])
                 sc = "".join(map(lambda c_: {True: str, False: lambda c__: "*"}[c_ in [0, 1]](c_),
-                                 list(map(lambda c_: c_ - p_, tc_[:-1]))))
-        if "*" in sc:
-            raise ValueError("Ce n'est pas un code valide")
+                                 list(map(lambda c_: c_ - p_, lc[:-1]))))
+        assert "*" not in sc
         # complémentation (si 1 n'est pas le caractère isolé)
         complement_ = "11" in sc
         # if complement:
@@ -54,9 +53,9 @@ def reconnaissance(tc):
         # le palier terminal est complet s'il se termine par le caractère isolé
         complet = ci == sc[-1]
         # if complet:
-        #    tl = [len(c) + 1 for c in sc[:-1].split(ci)]
+        #    tl_ = [len(c) + 1 for c in sc[:-1].split(ci)]
         # else:
-        #    tl = [len(c) + 1 for c in sc.split(ci)]
+        #    tl_ = [len(c) + 1 for c in sc.split(ci)]
         # symétrie (longueurs des paliers caractère isolé inclus)
         tl_ = [len(c_) + 1 for c_ in sc[:len(sc) - {True: 1, False: 0}[complet]].split(ci)]
         # plus petit palier
@@ -89,12 +88,14 @@ def reconnaissance(tc):
         return ap, bp, rp
 
     # critère d'arrêt
-    # REMARQUE : peut être différent, 'if 1 == len(tc):' par exemple, mais ne donne pas toujours les mêmes résultats
-    #            bien que ceux-ci restent conforment dans la mesure ou ils représentent encore le même segment.
-    if min(tc) == max(tc):
-        a, b, r = tc[0], 1, 0
+    # REMARQUE : peut être différent, par exemple 'if 1 == len(tl):', mais ne donne pas toujours les mêmes résultats
+    #            bien que ceux-ci restent conforment dans la mesure ou ils représentent toujours le même segment de
+    #            droite discrète.
+    tl = array.array('l', liste_codes)
+    if min(tl) == max(tl):
+        a, b, r = tl[0], 1, 0
     else:
-        tl, p, g, complement = reduction(tc)
+        tl, p, g, complement = reduction(tl)
         # appels récursifs qui se terminent ci-dessus.
         a, b, r = reconnaissance(tl)
         # les appels sont dépilés ici.
@@ -109,8 +110,7 @@ def codes(liste_codes, x0_=0, y0_=0):
     Sortie : La forme quasi affine correspondant aux codes et aux valeurs initiales fournies.
     Références : [3] pour les détails.
     """
-    tl = array.array('l', liste_codes)
-    a, b, r = reconnaissance(tl)
+    a, b, r = reconnaissance(liste_codes)
     r += b * int(y0_) - a * int(x0_)
     return Fqa(a=a, b=b, r=r)
 
@@ -118,26 +118,19 @@ def codes(liste_codes, x0_=0, y0_=0):
 class Fqa:
     """Forme quasi affine."""
 
-    def __init__(self, a=1, b=1, r=0):
+    def __init__(self, a=0, b=1, r=0):
         """Forme quasi affine : y = Fqa(a,b,r)(x) = [(a * x + r) / b]
         Entrée : les caractéristiques a, b, r de la forme quasi affine.
         Sortie : La forme quasi affine Fqa.
         """
-        # Erreur : Dès que l'un des paramètres a, b, r n'est pas un entier.
-        # assert isinstance(a, int)
-        # assert isinstance(b, int)
-        # assert isinstance(r, int)
-
         self.a, self.b, self.r = int(a), int(b), int(r)
 
     def __call__(self, n_):
         """Entrée : un entier n.
         Sortie : Fqa(a,b,r)(n) = [(a * n + r) / b]
         """
-        # Erreur : si le paramètre a n'est pas un nombre entier.
-        # assert isinstance(n_, int)
         n_ = int(n_)
-        q_, _ = divent(self.a * n_ + self.r, self.b)
+        q_, _ = outils.divent(self.a * n_ + self.r, self.b)
         return q_
 
     def __eq__(self, autre):
@@ -159,7 +152,7 @@ class Fqa:
         # Erreur : Si le paramètre n n'est pas un nombre entier.
         # equivalent (n // self).
         n_ = int(n_)
-        q_, _ = divent(self.b * n_ + self.b - self.r - 1, self.a)
+        q_, _ = outils.divent(self.b * n_ + self.b - self.r - 1, self.a)
         # equivalent (n % self) = n - self * (n // self).
         r_ = n_ - self(q_)
         return q_, r_
@@ -182,7 +175,6 @@ class Base:
         Sortie : Une base.
         Erreur : Si le paramètre liste_fqa n'est pas une liste de formes quasi affines.
         """
-        # assert liste_fqa is not None
         assert isinstance(liste_fqa, list)
         self.t = []
         for value in liste_fqa:
@@ -196,7 +188,6 @@ class Base:
         Erreur : Si le paramètre liste_entiers n'est pas une liste d'entiers.
                  Ou si le paramètre liste_entiers a trop d'éléments.
         """
-        # assert liste_entiers is not None
         assert isinstance(liste_entiers, list)
         assert len(self.t) >= len(liste_entiers)
         # REMARQUE : si la taille de la liste d'entiers est inférieure à celle de self.t,
@@ -368,9 +359,8 @@ if "__main__" == __name__:
     # print((30.6 * (m + 1)) // 1 )
     # print(j)
 
-
     def norm(a, m, j):
-        k, m = divent(m - 1, 12)
+        k, m = outils.divent(m - 1, 12)
         m += 1
         a += k
         if 3 > m:
@@ -380,7 +370,7 @@ if "__main__" == __name__:
 
 
     def dnorm(a, m, j):
-        k, m = divent(m - 3, 12)
+        k, m = outils.divent(m - 3, 12)
         m += 3
         a += k
         if 12 < m:

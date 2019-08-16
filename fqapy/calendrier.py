@@ -15,13 +15,14 @@ ATTENTION : différent de [2] p. 17 où le dimanche débute le semaine."""
 
 from enum import IntEnum
 
-from .fqa import *
+from . import fqa
+from . import outils
 
 
 def _corr_am(a_=0, m_=1, o_=1):
     # Entrée : une année a et un mois m.
     # Sortie : une année ajustée a et un mois m tels que o <= m <= o+11.
-    i_, m_ = divent(m_ - o_, 12)
+    i_, m_ = outils.divent(m_ - o_, 12)
     a_ += i_
     m_ += o_
     return a_, m_
@@ -192,29 +193,29 @@ class Date:
     #             une année, v un mois et w un jour avec heure au sens du
     #             calendrier grégorien (ou autres) même si cela est le plus souvent
     #             le cas dans ce contexte.
-    #             L'attribut t contient le temps (l'heure) extrait de w.
     #             Par exemple, pour le calendrier ISO u serait une année,
     #             v un numéro de semaine dans l'année et w un numéro de jour dans
     #             la semaine.
+    #             L'attribut t contient le temps (l'heure) extrait de w.
     def __init__(self, u_, v_, w_, calendrier):
         """Entrée : les trois paramètres u, v, w et le calendrier.
         Sortie : Le Date.
         Erreur : Si u ou v n'est pas un entier ou si w n'est pas un flottant ou un entier
                  ou si le calendrier n'est pas un Calendrier.
         """
-        assert isinstance(u_, int)
-        assert isinstance(v_, int)
-        assert (isinstance(w_, float) or isinstance(w_, int))
+        # assert isinstance(u_, int)
+        # assert isinstance(v_, int)
+        # assert (isinstance(w_, float) or isinstance(w_, int))
         assert isinstance(calendrier, Calendrier)
-        self.u, self.v = u_, v_
-        self.w, self.t = ent(w_)
+        self.u, self.v = int(u_), int(v_)
+        self.w, self.t = outils.ent(w_)
         self.calendrier = calendrier
 
     def __eq__(self, autre):
         if not isinstance(autre, Date):
             return False
         return (self.u == autre.u and self.v == autre.v and self.w == autre.w
-                and egalf(self.t, autre.t)
+                and outils.egalf(self.t, autre.t)
                 and self.calendrier == autre.calendrier)
 
     def __call__(self):
@@ -237,43 +238,34 @@ class _Quantite:
     def __init__(self, n_=0, f_=0.0):
         """Entrée : Un nombre entier n et un nombre flottant f.
         Sortie : Une Quantite.
-        Erreur : Si n n'est pas un entier ou si f n'est pas un entier ou un flottant.
         """
-        if not isinstance(n_, int):
-            raise TypeError("Le paramètre n n'est pas un entier")
+        n_ = int(n_)
         if isinstance(f_, int):
             n_ += f_
             f_ = 0.0
-        if not isinstance(f_, float):
-            raise TypeError("Le paramètre f n'est pas un entier ou un flottant")
+        f_ = float(f_)
         # au final f doit vérifier 0.0 <= f < 1.0.
-        j_, self.f = ent(f_)
+        j_, self.f = outils.ent(f_)
         self.n = n_ + j_
 
     def __add__(self, autre):
         """Entrée : un nombre entier ou flottant à ajouter.
         Sortie : Une nouvelle Quantite translatée de autre.
-        Erreur : Si autre n'est pas un entier ou un flottant.
         """
-        if not (isinstance(autre, float) or isinstance(autre, int)):
-            raise TypeError("Le paramètre n'est pas un entier ou un flottant")
-        n_, f_ = ent(autre)
+        n_, f_ = outils.ent(float(autre))
         n_ += self.n
         f_ += self.f
-        j_, f_ = ent(f_)
+        j_, f_ = outils.ent(f_)
         return _Quantite(n_ + j_, f_)
 
     def __iadd__(self, autre):
         """Entrée : Un nombre entier ou flottant à ajouter.
         Sortie : La même Quantite translaté de autre.
-        Erreur : Si autre n'est pas un entier ou un flottant.
         """
-        if not (isinstance(autre, float) or isinstance(autre, int)):
-            raise TypeError("Le paramètre n'est pas un entier ou un flottant")
-        n_, f_ = ent(autre)
+        n_, f_ = outils.ent(float(autre))
         n_ += self.n
         f_ += self.f
-        j_, f_ = ent(f_)
+        j_, f_ = outils.ent(f_)
         self.n, self.f = n_ + j_, f_
         return self
 
@@ -282,7 +274,6 @@ class _Quantite:
         Entrée : Un nombre entier ou flottant ou une Quantite à soustraire.
         Sortie : Un nombre flottant si autre est une Quantite.
                  Une Quantite si autre est un nombre.
-        Erreur : Si autre n'est pas un entier ou un flottant.
         REMARQUE : Par exemple dans le cas où Quantite représente des dates,
                    la différence entre deux dates à un sens intuitif
                    mais que pourrait signifier :
@@ -295,33 +286,28 @@ class _Quantite:
         if isinstance(autre, _Quantite):
             n_, f_ = autre.n, autre.f
             n_, f_ = self.n - n_, self.f - f_
-            j_, f_ = ent(f_)
+            j_, f_ = outils.ent(f_)
             return n_ + j_ + f_
         # Soustraction d'un nombre -> une Quantite
-        elif isinstance(autre, float) or isinstance(autre, int):
-            n_, f_ = ent(autre)
-            n_, f_ = self.n - n_, self.f - f_
-            j_, f_ = ent(f_)
-            return _Quantite(n_ + j_, f_)
-        else:
-            raise TypeError("Le paramètre n'est pas un entier ou un flottant ou un JourJulien")
+        n_, f_ = outils.ent(float(autre))
+        n_, f_ = self.n - n_, self.f - f_
+        j_, f_ = outils.ent(f_)
+        return _Quantite(n_ + j_, f_)
 
     def __isub__(self, autre):
         """Entrée : Un nombre entier ou flottant à soustraire.
         Sortie : La même Quantite "augmentée" de autre.
-        Erreur : Si autre n'est pas un entier ou un flottant.
         """
-        assert (isinstance(autre, float) or isinstance(autre, int))
-        n_, f_ = ent(autre)
+        n_, f_ = outils.ent(float(autre))
         n_, f_ = self.n - n_, self.f - f_
-        j_, f_ = ent(f_)
+        j_, f_ = outils.ent(f_)
         self.n, self.f = n_ + j_, f_
         return self
 
     def __eq__(self, autre):
         if not isinstance(autre, _Quantite):
             return False
-        return self.n == autre.n and egalf(self.f, autre.f)
+        return self.n == autre.n and outils.egalf(self.f, autre.f)
 
     def __call__(self):
         return self.n + self.f
@@ -402,11 +388,11 @@ EPOQUE_RFR = EPOQUE_RD + 654415
 EPOQUE_BAH = EPOQUE_RD + 673222
 
 
-class Calendrier(Base):
+class Calendrier(fqa.Base):
     """Calendrier défini comme dans [1]."""
 
     def date_vers_jj(self, date: Date) -> JourJulien:
-        """Entrée : Une Date(a, m, j, t) représentant la date dans le calendrier.
+        """Entrée : Une Date(u, v, w, t) représentant la date dans le calendrier.
         Sortie : le Jour julien correspondant.
         Erreur : Si le paramètre n'est pas une date.
         """
@@ -414,11 +400,12 @@ class Calendrier(Base):
 
     def date(self, jj: JourJulien):
         """Entrée : Un Jour julien.
-        Sortie : La Date(a, m, j, t) représentant le Jour julien dans le calendrier.
+        Sortie : La Date(u, v, w, t) représentant le Jour julien dans le calendrier.
         Erreur : Si le paramètre n'est pas un Jour julien.
         """
         raise NotImplementedError("Méthode non implémentée.")
 
+    # TODO: formatage d'une date selon le calendrier
     # def format(self, jj):
     #    raise NotImplementedError("Méthode non implémentée.")
 
@@ -428,10 +415,10 @@ class _CalendrierGre(Calendrier):
 
     def __init__(self):
         super().__init__([
-            Fqa(146097, 4, 6884480),
-            Fqa(1461, 4, 0),
-            Fqa(153, 5, -457),
-            Fqa(1, 1, -1),
+            fqa.Fqa(146097, 4, 6884480),
+            fqa.Fqa(1461, 4, 0),
+            fqa.Fqa(153, 5, -457),
+            fqa.Fqa(1, 1, -1),
         ])
 
     def date_vers_jj(self, date):
@@ -442,7 +429,7 @@ class _CalendrierGre(Calendrier):
         assert isinstance(date, Date)
         a_, m_ = _norm_am(date.u, date.v)
         d_, t = date.w, date.t
-        c_, b_ = divent(a_, 100)
+        c_, b_ = outils.divent(a_, 100)
         n_ = super().__call__([c_, b_, m_, d_])
         jj_ = JourJulien(n_, t)
         return jj_
@@ -467,9 +454,9 @@ class _CalendrierJul(Calendrier):
 
     def __init__(self):
         super().__init__([
-            Fqa(1461, 4, 6884472),
-            Fqa(153, 5, -457),
-            Fqa(1, 1, -1),
+            fqa.Fqa(1461, 4, 6884472),
+            fqa.Fqa(153, 5, -457),
+            fqa.Fqa(1, 1, -1),
         ])
 
     def date_vers_jj(self, date):
@@ -477,8 +464,7 @@ class _CalendrierJul(Calendrier):
         Sortie : le Jour julien correspondant.
         Erreur : Si le paramètre n'est pas une date.
         """
-        if not isinstance(date, Date):
-            raise TypeError("Le paramètre n'est pas une Date")
+        assert isinstance(date, Date)
         a_, m_ = _norm_am(date.u, date.v)
         d_, t_ = date.w, date.t
         n_ = super().__call__([a_, m_, d_])
@@ -505,9 +491,9 @@ class _CalendrierIsl(Calendrier):
 
     def __init__(self):
         super().__init__([
-            Fqa(10631, 30, 58442583),
-            Fqa(325, 11, -320),
-            Fqa(1, 1, -1),
+            fqa.Fqa(10631, 30, 58442583),
+            fqa.Fqa(325, 11, -320),
+            fqa.Fqa(1, 1, -1),
         ])
 
     def date_vers_jj(self, date):
@@ -515,8 +501,7 @@ class _CalendrierIsl(Calendrier):
         Sortie : le Jour julien correspondant.
         Erreur : Si le paramètre n'est pas une date.
         """
-        # if not isinstance(date, Date):
-        #    raise TypeError("Le paramètre n'est pas une Date")
+        assert isinstance(date, Date)
         a_, m_ = _corr_am(date.u, date.v)
         d_, t_ = date.w, date.t
         n_ = super().__call__([a_, m_, d_])

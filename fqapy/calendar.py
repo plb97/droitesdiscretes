@@ -1,5 +1,5 @@
 # Calendar
-from .outils import ent, pgcd
+from . import outils
 
 """
 Bibliographie.
@@ -110,7 +110,7 @@ def day_number_of_label(a, b, c, d, gamma=0, delta=0):
     Sortie : Le "day number" du label (a, b).
     Référence : [2] (1.33) p. 20.
     """
-    gcd, k, _ = pgcd(c, d)
+    gcd, k, _ = outils.pgcd(c, d)
     lcm = c * d // gcd
     return (a - gamma + (c * (b - a + gamma - delta) % d) // gcd) % lcm
 
@@ -181,7 +181,7 @@ class GDate:
 
     def __init__(self, month, day, year):
         self.month = int(month)
-        self.day, self.time = ent(day)
+        self.day, self.time = outils.ent(day)
         self.year = int(year)
 
     def __eq__(self, other):
@@ -233,7 +233,7 @@ def gregorian_year_from_fixed(date):
     Sortie : L'année grégorienne correspondant au jour julien date.
     Référence : [2] (2.18) p.37.
     """
-    d0, _ = ent(date - _GREGORIAN_EPOCH)
+    d0, _ = outils.ent(date - _GREGORIAN_EPOCH)
     n400, d1 = d0 // 146097, d0 % 146097
     n100, d2 = d1 // 36524, d1 % 36524
     n4, d3 = d2 // 1461, d2 % 1461
@@ -247,7 +247,7 @@ def gregorian_from_fixed(date):
     Sortie : Le mois, le jour et l'année grégorienne correspondant au jour julien date.
     Référence : [2] (2.19) p.38.
     """
-    date, time = ent(date)
+    date, time = outils.ent(date)
     year = gregorian_year_from_fixed(date)
     prior_days = date - fixed_from_gregorian(GDate(_JANUARY, 1, year))
     correction = (_si_(date < fixed_from_gregorian(GDate(_MARCH, 1, year)), 0,
@@ -394,7 +394,7 @@ class ISODate:
         Référence : [2] p. 33.
         """
         self.week = int(week)
-        self.day, self.time = ent(day)
+        self.day, self.time = outils.ent(day)
         self.year = int(year)
 
     def __eq__(self, other):
@@ -426,7 +426,7 @@ def iso_from_fixed(date):
     Sortie : La date ISO correspondante.
     Référence : [2] (3.2) p. 43.
     """
-    date, time = ent(date)
+    date, time = outils.ent(date)
     approx = gregorian_year_from_fixed(date - 3)
     year = _si_(date >= fixed_from_iso(ISODate(1, 1, approx + 1)), approx + 1, approx)
     week = (date - fixed_from_iso(ISODate(1, 1, year))) // 7 + 1
@@ -452,7 +452,7 @@ class JDate:
 
     def __init__(self, month, day, year):
         self.month = int(month)
-        self.day, self.time = ent(day)
+        self.day, self.time = outils.ent(day)
         self.year = int(year)
 
     def __eq__(self, other):
@@ -507,7 +507,7 @@ def julian_from_fixed(date):
     Sortie : Le mois, le jour et l'année Julienne correspondant au jour julien date.
     Référence : [2] (4.4) p.48.
     """
-    date, time = ent(date)
+    date, time = outils.ent(date)
     approx = (4 * (date - _JULIAN_EPOCH) + 1464) // 1461
     year = _si_(approx <= 0, approx - 1, approx)
     prior_days = date - fixed_from_julian(JDate(_JANUARY, 1, year))
@@ -610,7 +610,7 @@ class CDate:
 
     def __init__(self, month, day, year):
         self.month = int(month)
-        self.day, self.time = ent(day)
+        self.day, self.time = outils.ent(day)
         self.year = int(year)
 
     def __eq__(self, other):
@@ -648,7 +648,7 @@ def coptic_from_fixed(date):
     Sortie : La date copte CDate correspondante.
     Référence : [2] (5.4) p. 58.
     """
-    date, time = ent(date)
+    date, time = outils.ent(date)
     year = (4 * (date - _COPTIC_EPOCH) + 1463) // 1461
     month = (date - fixed_from_coptic(CDate(1, 1, year))) // 30 + 1
     day = date + 1 - fixed_from_coptic(CDate(month, 1, year))
@@ -670,7 +670,7 @@ class EDate:
 
     def __init__(self, month, day, year):
         self.month = int(month)
-        self.day, self.time = ent(day)
+        self.day, self.time = outils.ent(day)
         self.year = int(year)
 
     def __eq__(self, other):

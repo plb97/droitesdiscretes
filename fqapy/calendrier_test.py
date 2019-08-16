@@ -20,6 +20,7 @@
 import unittest
 
 from . import calendrier
+from . import outils
 
 
 class Tcalend:
@@ -63,21 +64,21 @@ class CalendrierTestCase(unittest.TestCase):
             jjp2 = calendrier.EPOQUE_JJ + v_["jj"] + 2
             # print("jjp2", jjp2, "jj", jj)
             jjp2 = jjp2 - calendrier.EPOQUE_JJ
-            self.assertTrue(calendrier.egalf(jjp2, jj + 2))
+            self.assertTrue(outils.egalf(jjp2, jj + 2))
             jjm35 = (calendrier.EPOQUE_JJ + v_["jj"]) - 3.5
             # print("jjm35", jjm35, "jj", jj)
             jjm35 = jjm35 - calendrier.EPOQUE_JJ
-            self.assertTrue(calendrier.egalf(jjm35, jj - 3.5))
+            self.assertTrue(outils.egalf(jjm35, jj - 3.5))
             jjp2 = calendrier.EPOQUE_JJ + v_["jj"]
             # print("jjp2", jjp2, "jj", jj)
             jjp2 += 2
             # print("jjp2", jjp2, "jj", jj)
-            self.assertTrue(calendrier.egalf(jjp2 - calendrier.EPOQUE_JD, jd + 2))
+            self.assertTrue(outils.egalf(jjp2 - calendrier.EPOQUE_JD, jd + 2))
             jjm35 = calendrier.EPOQUE_JJ + v_["jj"]
             # print("jjm35", jjm35, "jj", jj)
             jjm35 -= 3.5
             # print("jjm35", jjm35, "jj", jj)
-            self.assertTrue(calendrier.egalf(jjm35 - calendrier.EPOQUE_JD, jd - 3.5))
+            self.assertTrue(outils.egalf(jjm35 - calendrier.EPOQUE_JD, jd - 3.5))
             # évaluation faite de gauche à droite
             jj = calendrier.EPOQUE_JD + v_["jd"] - calendrier.EPOQUE_JJ
             # translations
@@ -93,11 +94,16 @@ class CalendrierTestCase(unittest.TestCase):
         c_ = calendrier.CALENDRIER_GRE
         tt = [
             # lancement du premier Spoutnik
-            Tcalend(j_=2436116, t_=0.81, y_=1957, m_=calendrier.Mois.OCTOBRE, d_=4.81, c_=c_, js_=calendrier.Jours.VENDREDI),
-            Tcalend(j_=2448449, t_=0.25, y_=1991, m_=calendrier.Mois.JUILLET, d_=11.25, c_=c_, js_=calendrier.Jours.JEUDI),
-            Tcalend(j_=2451545, t_=0.5, y_=2000, m_=calendrier.Mois.JANVIER, d_=1.5, c_=c_, js_=calendrier.Jours.SAMEDI),
-            Tcalend(j_=2457578, t_=0.75, y_=2016, m_=calendrier.Mois.JUILLET, d_=8.75, c_=c_, js_=calendrier.Jours.VENDREDI),
-            Tcalend(j_=2299161, t_=0.0, y_=1582, m_=calendrier.Mois.OCTOBRE, d_=15.0, c_=c_, js_=calendrier.Jours.VENDREDI),
+            Tcalend(j_=2436116, t_=0.81, y_=1957, m_=calendrier.Mois.OCTOBRE, d_=4.81, c_=c_,
+                    js_=calendrier.Jours.VENDREDI),
+            Tcalend(j_=2448449, t_=0.25, y_=1991, m_=calendrier.Mois.JUILLET, d_=11.25, c_=c_,
+                    js_=calendrier.Jours.JEUDI),
+            Tcalend(j_=2451545, t_=0.5, y_=2000, m_=calendrier.Mois.JANVIER, d_=1.5, c_=c_,
+                    js_=calendrier.Jours.SAMEDI),
+            Tcalend(j_=2457578, t_=0.75, y_=2016, m_=calendrier.Mois.JUILLET, d_=8.75, c_=c_,
+                    js_=calendrier.Jours.VENDREDI),
+            Tcalend(j_=2299161, t_=0.0, y_=1582, m_=calendrier.Mois.OCTOBRE, d_=15.0, c_=c_,
+                    js_=calendrier.Jours.VENDREDI),
         ]
         # print()
         # print("test_calend_grégorien")
@@ -127,7 +133,8 @@ class CalendrierTestCase(unittest.TestCase):
         tt = [
             # Tcalend(j=1842713, t=0.75, y=333,m=Months.JANUARY,d=27.75, c=c, js=Days.SATURDAY),
             # Tcalend(j=2299160, t=0.5, y=1582,m=Months.OCTOBER,d=4.5, c=c, js=Days.THURSDAY),
-            Tcalend(j_=1842713, t_=0.75, y_=333, m_=calendrier.Mois.JANVIER, d_=27.75, c_=c_, js_=calendrier.Jours.SAMEDI),
+            Tcalend(j_=1842713, t_=0.75, y_=333, m_=calendrier.Mois.JANVIER, d_=27.75, c_=c_,
+                    js_=calendrier.Jours.SAMEDI),
             Tcalend(j_=2299160, t_=0.5, y_=1582, m_=calendrier.Mois.OCTOBRE, d_=4.5, c_=c_, js_=calendrier.Jours.JEUDI),
         ]
         # print()
@@ -182,7 +189,6 @@ class CalendrierTestCase(unittest.TestCase):
 
 
 if "__main__" == __name__:
-
     # print("EPOQUE_JUL - EPOQUE_JJ", calendrier.EPOQUE_JUL - calendrier.EPOQUE_JJ)
     # print("EPOQUE_COP - EPOQUE_JJ", calendrier.EPOQUE_COP - calendrier.EPOQUE_JJ)
     # print("EPOQUE_ETH - EPOQUE_JJ", calendrier.EPOQUE_ETH - calendrier.EPOQUE_JJ)

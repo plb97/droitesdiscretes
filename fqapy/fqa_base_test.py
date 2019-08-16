@@ -1,6 +1,7 @@
 import unittest
 
 from . import fqa
+from . import outils
 
 
 class FqaBaseTestCase(unittest.TestCase):
@@ -35,12 +36,12 @@ class FqaBaseTestCase(unittest.TestCase):
         # print("test_base_temps")
         for v_ in tt:
             u_ = ([0] * (4 - len(v_["jhms"])) + v_["jhms"])[-4:]
-            t0 = 86400 * u_[0] + 3600 * u_[1] + 60 * u_[2] + u_[3]
+            # t0 = 86400 * u_[0] + 3600 * u_[1] + 60 * u_[2] + u_[3]
             # print("v", v_, "t0", t0)
-            s_ = t0
-            j_, s_ = fqa.divent(s_, 86400)
-            h_, s_ = fqa.divent(s_, 3600)
-            m_, s_ = fqa.divent(s_, 60)
+            # s_ = t0
+            # j_, s_ = outils.divent(s_, 86400)
+            # h_, s_ = outils.divent(s_, 3600)
+            # m_, s_ = outils.divent(s_, 60)
             # print("t0", t0, "->", [j_, h_, m_, s_])
             t_ = fqa.BASE_TEMPS(u_)
             # print("t", t_)
