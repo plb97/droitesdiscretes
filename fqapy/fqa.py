@@ -18,12 +18,12 @@ from . import outils
 
 
 def reconnaissance(liste_codes):
-    # Entrée : Un tableau d'entiers (codes).
+    # Entrée : Une liste d'entiers (codes).
     # Sortie : Les caractéristiques a, b, r de la forme quasi affine.
     # Erreur : ValueError si les codes ne sont pas ceux d'un segment de droite discrète.
     # Références [3] et [5].
     def reduction(lc):
-        # Algorithme décrit dans [3] et [5].
+        # Algorithme décrit dans [3] et [5] : reconnaissance.
         #
         # def cd(c):
         # if c in [0,1]:
@@ -50,8 +50,8 @@ def reconnaissance(liste_codes):
         #    ci = "1"
         # caractère isolé
         ci = {True: "0", False: "1"}[complement_]
-        # le palier terminal est complet s'il se termine par le caractère isolé
-        complet = ci == sc[-1]
+        # le palier terminal est complet s'il se termine par le caractère isolé (sc[-1] == ci)
+        complet = sc[-1] == ci
         # if complet:
         #    tl_ = [len(c) + 1 for c in sc[:-1].split(ci)]
         # else:
@@ -75,11 +75,12 @@ def reconnaissance(liste_codes):
         return tl_, p_, g_, complement_
 
     def restitution(a_, b_, r_, p_, g_, complement_):
+        # Algorithme décrit dans [3] et [5] : restitution des paramètres a, b et r.
         ap, bp, rp = b_, a_, b_ - r_ - 1
         # translation
         if 0 < g_:
             rp -= ap * g_ - bp
-            # r = (r - a * g) % b
+            # rp = (rp - ap * g_) % bp
         # complémentation : x' = x ; y' = x - y
         if complement_:
             ap, bp, rp = bp - ap, bp, bp - rp - 1
@@ -89,23 +90,23 @@ def reconnaissance(liste_codes):
 
     # critère d'arrêt
     # REMARQUE : peut être différent, par exemple 'if 1 == len(tl):', mais ne donne pas toujours les mêmes résultats
-    #            bien que ceux-ci restent conforment dans la mesure ou ils représentent toujours le même segment de
+    #            bien que ceux obtenus restent conforment dans la mesure où ils représentent toujours le même segment de
     #            droite discrète.
     tl = array.array('l', liste_codes)
     if min(tl) == max(tl):
         a, b, r = tl[0], 1, 0
     else:
         tl, p, g, complement = reduction(tl)
-        # appels récursifs qui se terminent ci-dessus.
+        # appels récursifs qui se terminent ci-dessus (critère d'arrêt).
         a, b, r = reconnaissance(tl)
-        # les appels sont dépilés ici.
+        # les appels récursifs sont dépilés ici.
         a, b, r = restitution(a, b, r, p, g, complement)
     return a, b, r
 
 
 def codes(liste_codes, x0_=0, y0_=0):
     """Reconnaissance des codes.
-    Entrée : Un tableau d'entiers (codes).
+    Entrée : Une liste d'entiers (codes).
            : Les valeurs initiales x0 et y0 nulles par défaut.
     Sortie : La forme quasi affine correspondant aux codes et aux valeurs initiales fournies.
     Références : [3] pour les détails.
