@@ -18,9 +18,9 @@ def gen(f_, x0_=0, x1_=0):
         raise ValueError("x1 n'est pas strictement supérieur à x0")
     ty = []
     for i in range(x1_ - x0_ + 1):
-        x = x0_ + i
-        y = f_(x)
-        ty.append((x, y))
+        x_ = x0_ + i
+        y_ = f_(x_)
+        ty.append((x_, y_))
     return ty
 
 
@@ -107,4 +107,5 @@ if "__main__" == __name__:
         for x in range(x0, x1 + 1):
             y = fqa2(x)
             print(x, y, y == txy[x - x0][1])
+
 

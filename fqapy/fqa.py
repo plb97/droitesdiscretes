@@ -13,49 +13,42 @@ Bibliographie.
     (Albert TROESCH, Theoretical Computer Science 115 (1993) 291-319)
         disponible sur https://www.sciencedirect.com/science/article/pii/0304397593901219
 """
+
+# ATTENTION : La conversion systématique (et généralement silencieuse) des paramètres des fonctions
+#             au type attendu est faite par parti-pris.
+
 import array
 from . import outils
 
 
 def reconnaissance(liste_codes):
-    # Entrée : Une liste d'entiers (codes).
-    # Sortie : Les caractéristiques a, b, r de la forme quasi affine.
-    # Erreur : ValueError si les codes ne sont pas ceux d'un segment de droite discrète.
-    # Références [3] et [5].
+    """Reconnaissance des codes.
+    Entrée : Une liste d'entiers (codes).
+    Sortie : Les caractéristiques a, b, r de la forme quasi affine.
+    Erreur : ValueError si les codes ne sont pas ceux d'un segment de droite discrète.
+    Références [3] et [5].
+    """
     def reduction(lc):
         # Algorithme décrit dans [3] et [5] : reconnaissance.
-        #
-        # def cd(c):
-        # if c in [0,1]:
-        #    return str(c)
-        # else:
-        #    return "*"
         p_ = min(lc)
         # transvection
         sc = "".join(
-            map(lambda c_: {True: str, False: lambda c__: "*"}[c_ in [0, 1]](c_), list(map(lambda c_: c_ - p_, lc))))
+            map(lambda c_: {True: str, False: lambda c__: "*"}[c_ in [0, 1]](c_), list(map(lambda c__: c__ - p_, lc))))
         # En cas d'erreur, le dernier code peut être ignoré si c'est le plus petit
+        # REMARQUE : len(lc) >= 2 obligatoirement car il y a au minimum un "0" et une "*".
+        #            On peut donc retirer sans risque un élément si nécessaire.
+        if "*" in sc and lc[-1] == p_:
+            p_ = min(lc[:-1])
+            sc = "".join(map(lambda c_: {True: str, False: lambda c__: "*"}[c_ in [0, 1]](c_),
+                             list(map(lambda c_: c_ - p_, lc[:-1]))))
         if "*" in sc:
-            # mise à l'écart du dernier code si c'est le plus petit
-            if lc[-1] == p_:
-                p_ = min(lc[:-1])
-                sc = "".join(map(lambda c_: {True: str, False: lambda c__: "*"}[c_ in [0, 1]](c_),
-                                 list(map(lambda c_: c_ - p_, lc[:-1]))))
-        assert "*" not in sc
+            raise ValueError("Liste de codes invalide")
         # complémentation (si 1 n'est pas le caractère isolé)
         complement_ = "11" in sc
-        # if complement:
-        #    ci = "0"
-        # else:
-        #    ci = "1"
         # caractère isolé
         ci = {True: "0", False: "1"}[complement_]
-        # le palier terminal est complet s'il se termine par le caractère isolé (sc[-1] == ci)
+        # le palier terminal est complet s'il s'achève par le caractère isolé (sc[-1] == ci)
         complet = sc[-1] == ci
-        # if complet:
-        #    tl_ = [len(c) + 1 for c in sc[:-1].split(ci)]
-        # else:
-        #    tl_ = [len(c) + 1 for c in sc.split(ci)]
         # symétrie (longueurs des paliers caractère isolé inclus)
         tl_ = [len(c_) + 1 for c_ in sc[:len(sc) - {True: 1, False: 0}[complet]].split(ci)]
         # plus petit palier
@@ -75,7 +68,7 @@ def reconnaissance(liste_codes):
         return tl_, p_, g_, complement_
 
     def restitution(a_, b_, r_, p_, g_, complement_):
-        # Algorithme décrit dans [3] et [5] : restitution des paramètres a, b et r.
+        # Algorithme décrit dans [3] et [5] : restitution à rebours des paramètres a, b et r.
         ap, bp, rp = b_, a_, b_ - r_ - 1
         # translation
         if 0 < g_:
@@ -88,11 +81,12 @@ def reconnaissance(liste_codes):
         ap, bp, rp = ap + p_ * bp, bp, rp
         return ap, bp, rp
 
-    # critère d'arrêt
-    # REMARQUE : peut être différent, par exemple 'if 1 == len(tl):', mais ne donne pas toujours les mêmes résultats
-    #            bien que ceux obtenus restent conforment dans la mesure où ils représentent toujours le même segment de
-    #            droite discrète.
+    assert 0 < len(liste_codes)
     tl = array.array('l', liste_codes)
+    # REMARQUE : le critère d'arrêt peut être différent, par exemple 'if 1 == len(tl):', mais ne donne pas toujours les
+    # mêmes résultats bien que ceux obtenus restent conforment dans la mesure où ils représentent toujours le même
+    # segment de droite discrète.
+    # critère d'arrêt
     if min(tl) == max(tl):
         a, b, r = tl[0], 1, 0
     else:
@@ -107,9 +101,10 @@ def reconnaissance(liste_codes):
 def codes(liste_codes, x0_=0, y0_=0):
     """Reconnaissance des codes.
     Entrée : Une liste d'entiers (codes).
-           : Les valeurs initiales x0 et y0 nulles par défaut.
+           : Les valeurs initiales x0_ et y0_ nulles par défaut.
     Sortie : La forme quasi affine correspondant aux codes et aux valeurs initiales fournies.
-    Références : [3] pour les détails.
+    Erreur : ValueError si les codes ne sont pas ceux d'un segment de droite discrète.
+    Références : [3] et [5] pour les détails.
     """
     a, b, r = reconnaissance(liste_codes)
     r += b * int(y0_) - a * int(x0_)
@@ -150,11 +145,10 @@ class Fqa:
             Entrée : Un nombre entier n.
             Sortie : Le "quotient" q ~ n // self et le "reste" r ~ (n % self).
         """
-        # Erreur : Si le paramètre n n'est pas un nombre entier.
-        # equivalent (n // self).
         n_ = int(n_)
+        # equivalent (q = n // self).
         q_, _ = outils.divent(self.b * n_ + self.b - self.r - 1, self.a)
-        # equivalent (n % self) = n - self * (n // self).
+        # equivalent (r = n % self) = n - self * (n // self).
         r_ = n_ - self(q_)
         return q_, r_
 
@@ -291,7 +285,7 @@ class Representation:
 
 
 class _BaseTemps(Base):
-    """Base temps [jour, heures, minutes, secondes]."""
+    """Base temps [jours, heures, minutes, secondes]."""
 
     def __init__(self):
         super().__init__([
@@ -308,6 +302,7 @@ if "__main__" == __name__:
 
     # RAPPELS : les codes si définis par : c(x) = f(x+1) - f(x)
     print("fqa")
+
 
     # print()
     # print("les années")
