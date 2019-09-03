@@ -10,7 +10,7 @@ pipeline {
     post {
         always {
             echo 'This will always run'
-            junit 'reports/**/*.xml'
+            junit 'reports/**/TEST-*.xml'
         }
         success {
             echo 'This will run only if successful'
