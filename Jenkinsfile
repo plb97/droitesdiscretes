@@ -3,7 +3,7 @@ pipeline {
     stages {
         stage('Test') {
             steps {
-                sh 'python3 -m xmlrunner discover'
+                sh 'python3 -m xmlrunner -o reports discover'
             }
         }
     }
