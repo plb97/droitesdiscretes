@@ -259,4 +259,8 @@ if "__main__" == __name__:
     # print("calendar_test")
     # print("coptic epoch", fixed_from_julian(JDate(8, 29, 284)))
     # print("coptic_christmas(2019)", gregorian_from_fixed(coptic_christmas(2019)[0]))
-    unittest.main()
+    # unittest.main()
+
+    import xmlrunner
+
+    unittest.main(testRunner=xmlrunner.XMLTestRunner(output='test-reports'))
