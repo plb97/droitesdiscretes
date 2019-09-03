@@ -112,7 +112,7 @@ class CalendarTestCase(unittest.TestCase):
                 # print("y", y - 1, "a", a_ - 1, "n", n_, n_ - pn, ["", "*"][(n_ - pn) % L])
                 # pn = n_
                 self.assertEqual(y, a_)
-            print()
+            # print()
         #
         # with self.assertRaises(TypeError):
         #    pass
