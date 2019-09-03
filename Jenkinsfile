@@ -3,7 +3,7 @@ pipeline {
     stages {
         stage('Test') {
             steps {
-                sh 'pwd; whoami; #python3 -m unittest discover'
+                sh 'python3 -m unittest discover'
             }
         }
     }
