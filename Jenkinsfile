@@ -3,7 +3,7 @@ pipeline {
     stages {
         stage('Test') {
             steps {
-                sh 'echo "Échoué !"; exit 1'
+                sh 'python3 -m unittest discover'
             }
         }
     }
