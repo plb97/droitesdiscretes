@@ -1,4 +1,5 @@
 import fqapy.fqa as fqa
+import fqapy.calendrier as calendrier
 
 
 def ddy(a_, b_, c_):
@@ -108,4 +109,5 @@ if "__main__" == __name__:
             y = fqa2(x)
             print(x, y, y == txy[x - x0][1])
 
-
+    dt0 = calendrier.Date(calendrier.CALENDRIER_JUL, 1789, 7, 14)
+    print(dt0, repr(dt0))

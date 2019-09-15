@@ -26,7 +26,7 @@ from . import outils
 class Tcalend:
     def __init__(self, j_=0, t_=0., y_=0, m_=0, d_=0., c_=None, js_=0):
         self.j = j_
-        self.dt = calendrier.Date(y_, m_, d_, c_)
+        self.dt = calendrier.Date(c_ , y_, m_, d_)
         self.js = js_
         self.jj = calendrier.EPOQUE_JJ + j_ + t_
         # ATTENTION : La façon dont on écrit self.jd peut avoir des conséquences sur la précision.
@@ -175,7 +175,7 @@ class CalendrierTestCase(unittest.TestCase):
     def test_date(self):
         """Test des dates"""
         tt = [
-            {"date": calendrier.Date(2019, 6, 27, calendrier.CALENDRIER_GRE), "jj": calendrier.EPOQUE_JJ + 2458662},
+            {"date": calendrier.Date(calendrier.CALENDRIER_GRE, 2019, 6, 27), "jj": calendrier.EPOQUE_JJ + 2458662},
         ]
         # print()
         # print("test_date")

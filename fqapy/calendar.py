@@ -23,13 +23,6 @@ REMARQUE : 'date' signifie (généralement) jour julien (c-à-d un nombre flotta
 """
 
 
-def _si_(ok, exp_ok, exp_not_ok):
-    if ok:
-        return exp_ok
-    else:
-        return exp_not_ok
-
-
 def day_of_week_from_fixed(date):
     """Jour de la semaine de la date (la semaine commence le lundi).
     Entrée : Un jour julien date.
@@ -45,7 +38,7 @@ def signum(y):
     Sortie : +1 si y > 0, -1 si y < 0 et 0 sinon.
     Référence : [2] p. 15.
     """
-    return _si_(0 > y, -1, _si_(0 < y, 1, 0))
+    return -1 if 0 > y else 1 if 0 < y else 0
 
 
 def amod(x, y):
@@ -56,7 +49,7 @@ def amod(x, y):
     Référence : [2] p. 15.
     """
     z = x % y
-    return _si_(z, z, y)
+    return z if z else y
 
 
 def kday_on_or_before(date, k):
@@ -66,6 +59,7 @@ def kday_on_or_before(date, k):
     Sortie : le jour julien recherché.
     Référence : [2] (1.22) p. 17.
     """
+    k = int(k) % 7
     return date - (date - k) % 7
 
 
@@ -179,9 +173,9 @@ _LAST = -1
 class GDate:
     """Référence [2] pp. 33-41"""
 
-    def __init__(self, month, day, year):
+    def __init__(self, month, day, year, time=0.0):
         self.month = int(month)
-        self.day, self.time = outils.ent(day)
+        self.day, self.time = outils.ent(float(day + time))
         self.year = int(year)
 
     def __eq__(self, other):
@@ -192,10 +186,10 @@ class GDate:
                     and self.time == other.time)
 
     def __repr__(self):
-        return "GDate: [month={}, day={}, year={}, time={}]".format(self.month, self.day, self.year, self.time)
+        return "GDate({}, {}, {}, {})".format(self.month, self.day, self.year, self.time)
 
     def __str__(self):
-        return "[month={}, day={}, year={}, time={}]".format(self.month, self.day, self.year, self.time)
+        return "[Gregorian: month={}, day={}, year={}, time={}]".format(self.month, self.day, self.year, self.time)
 
 
 def gregorian_leap_year(g_year):
@@ -205,12 +199,13 @@ def gregorian_leap_year(g_year):
              False sinon.
     Référence : [2] (2.16) p.36.
     """
-    return (g_year % 4) == 0 and not (g_year % 4) in [100, 200, 300]
+    gym4 = g_year % 4
+    return gym4 == 0 and not gym4 in [100, 200, 300]
 
 
 def _gregorian_day_adjust(g_year, month):
     """Référence : [2] (2.17) p.36."""
-    return _si_(month <= 2, 0, _si_(month > 2 and gregorian_leap_year(g_year), -1, -2))
+    return 0 if month <= 2 else -1 if month > 2 and gregorian_leap_year(g_year) else -2
 
 
 def fixed_from_gregorian(g_date):
@@ -238,7 +233,7 @@ def gregorian_year_from_fixed(date):
     n100, d2 = d1 // 36524, d1 % 36524
     n4, d3 = d2 // 1461, d2 % 1461
     n1, d4 = d3 // 365, d3 % 365
-    return 400 * n400 + 100 * n100 + 4 * n4 + n1 + _si_(n100 == 4 or n1 == 4, 0, 1)
+    return 400 * n400 + 100 * n100 + 4 * n4 + n1 + (0 if n100 == 4 or n1 == 4 else 1)
 
 
 def gregorian_from_fixed(date):
@@ -250,12 +245,13 @@ def gregorian_from_fixed(date):
     date, time = outils.ent(date)
     year = gregorian_year_from_fixed(date)
     prior_days = date - fixed_from_gregorian(GDate(_JANUARY, 1, year))
-    correction = (_si_(date < fixed_from_gregorian(GDate(_MARCH, 1, year)), 0,
-                       _si_(date >= fixed_from_gregorian(GDate(_MARCH, 1, year))
-                            and gregorian_leap_year(year), 1, 2)))
+    march1 = fixed_from_gregorian(GDate(_MARCH, 1, year))
+    correction = (0 if date < march1 else 
+                  1 if date >= march1 and gregorian_leap_year(year) else 
+                  2)
     month = (12 * (prior_days + correction) + 373) // 367
     day = date - fixed_from_gregorian(GDate(month, 1, year)) + 1
-    return GDate(month, day + time, year)
+    return GDate(month, day, year, time)
 
 
 def gregorian_date_difference(g_date_1, g_date_2):
@@ -303,8 +299,8 @@ def nth_kday(n, k, g_date):
     Sortie : Le jour julien recherché.
     Référence : [2] (2.24) p.40.
     """
-    return _si_(n > 0, 7 * n + kday_before(fixed_from_gregorian(g_date), k),
-                7 * n + kday_after(fixed_from_gregorian(g_date), k))
+    return (7 * n + kday_before(fixed_from_gregorian(g_date), k) if n > 0 else 
+            7 * n + kday_after(fixed_from_gregorian(g_date), k))
 
 
 def labor_day(g_year):
@@ -389,12 +385,12 @@ def assumption(g_year):
 class ISODate:
     """Référence [2] pp. 43-44"""
 
-    def __init__(self, week, day, year):
+    def __init__(self, week, day, year, time=0.0):
         """
         Référence : [2] p. 33.
         """
         self.week = int(week)
-        self.day, self.time = outils.ent(day)
+        self.day, self.time = outils.ent(float(day + time))
         self.year = int(year)
 
     def __eq__(self, other):
@@ -405,10 +401,10 @@ class ISODate:
                     and self.time == other.time)
 
     def __repr__(self):
-        return "ISODate: [week={}, day={}, year={}, time={}]".format(self.week, self.day, self.year, self.time)
+        return "ISODate({}, {}, {}, {})".format(self.week, self.day, self.year, self.time)
 
     def __str__(self):
-        return "[week={}, day={}, year={}, time={}]".format(self.week, self.day, self.year, self.time)
+        return "[ISO: week={}, day={}, year={}, time={}]".format(self.week, self.day, self.year, self.time)
 
 
 def fixed_from_iso(iso_date):
@@ -428,12 +424,12 @@ def iso_from_fixed(date):
     """
     date, time = outils.ent(date)
     approx = gregorian_year_from_fixed(date - 3)
-    year = _si_(date >= fixed_from_iso(ISODate(1, 1, approx + 1)), approx + 1, approx)
+    year = approx + (1 if date >= fixed_from_iso(ISODate(1, 1, approx + 1)) else 0)
     week = (date - fixed_from_iso(ISODate(1, 1, year))) // 7 + 1
     # day = amod(date, 7)
     # Pour tenir compte que la semaine débute le lundi (et pas le dimanche comme dans [2])
     day = date % 7 + 1
-    return ISODate(week, day + time, year)
+    return ISODate(week, day, year, time)
 
 
 # JULIAN CALENDAR
@@ -450,9 +446,9 @@ _JULIAN_EPOCH = 1721424
 class JDate:
     """Référence [2] pp. 47-55."""
 
-    def __init__(self, month, day, year):
+    def __init__(self, month, day, year, time=0.0):
         self.month = int(month)
-        self.day, self.time = outils.ent(day)
+        self.day, self.time = outils.ent(float(day + time))
         self.year = int(year)
 
     def __eq__(self, other):
@@ -463,13 +459,13 @@ class JDate:
                     and self.time == other.time)
 
     def __repr__(self):
-        return "JDate: [month={}, day={}, year={}, time={}]".format(self.month, self.day, self.year, self.time)
+        return "JDate({}, {}, {}, {})".format(self.month, self.day, self.year, self.time)
 
     def __str__(self):
         if self.year < 0:
-            return "[month={}, day={}, year={} B.C.E., time={}]".format(self.month, self.day, -self.year, self.time)
+            return "[Julian: month={}, day={}, year={} B.C.E., time={}]".format(self.month, self.day, -self.year, self.time)
         else:
-            return "[month={}, day={}, year={} C.E., time={}]".format(self.month, self.day, self.year, self.time)
+            return "[Julian: month={}, day={}, year={} C.E., time={}]".format(self.month, self.day, self.year, self.time)
 
 
 def julian_leap_year(j_year):
@@ -479,13 +475,12 @@ def julian_leap_year(j_year):
              False sinon.
     Référence [2] (4.1) p. 47.
     """
-    return j_year % 4 == _si_(j_year > 0, 0, 3)
+    return j_year % 4 == (0 if j_year > 0 else 3)
 
 
 def _julian_day_adjust(j_year, month):
     """Référence : [2] (2.17) p.36."""
-    return _si_(month <= 2, 0, _si_(month > 2 and julian_leap_year(j_year), -1, -2))
-
+    return 0 if month <= 2 else -1 if month > 2 and julian_leap_year(j_year) else -2
 
 def fixed_from_julian(j_date):
     """Calcule le jour julien sous la forme d'un nombre flottant.
@@ -495,7 +490,7 @@ def fixed_from_julian(j_date):
     REMARQUE : le jour julien est cohérent avec le Jour julien calculé avec
                le calendrier julien CALENDRIER_JUL.
     """
-    y = _si_(j_date.year < 0, j_date.year + 1, j_date.year)
+    y = j_date.year + (1 if j_date.year < 0 else 0)
     return (_JULIAN_EPOCH - 1 + 365 * (y - 1) + (y - 1) // 4
             + (367 * j_date.month - 362) // 12
             + _julian_day_adjust(j_date.year, j_date.month) + j_date.day) + j_date.time
@@ -509,13 +504,15 @@ def julian_from_fixed(date):
     """
     date, time = outils.ent(date)
     approx = (4 * (date - _JULIAN_EPOCH) + 1464) // 1461
-    year = _si_(approx <= 0, approx - 1, approx)
+    year = approx - (1 if approx <= 0 else 0)
     prior_days = date - fixed_from_julian(JDate(_JANUARY, 1, year))
-    correction = _si_(date < fixed_from_julian(JDate(_MARCH, 1, year)), 0,
-                      _si_(date >= fixed_from_julian(JDate(_MARCH, 1, year)) and julian_leap_year(year), 1, 2))
+    march1 = fixed_from_julian(JDate(_MARCH, 1, year))
+    correction = (0 if date < march1 else 
+                  1 if date >= march1 and julian_leap_year(year) else 
+                  2)
     month = (12 * (prior_days + correction) + 373) // 367
     day = date - fixed_from_julian(JDate(month, 1, year)) + 1
-    return JDate(month, day + time, year)
+    return JDate(month, day, year, time)
 
 
 def julian_in_gregorian(j_month, j_day, g_year):
@@ -532,8 +529,8 @@ def julian_in_gregorian(j_month, j_day, g_year):
     y = julian_from_fixed(jan1).year
     date1 = fixed_from_julian(JDate(j_month, j_day, y))
     date2 = fixed_from_julian(JDate(j_month, j_day, y + 1))
-    lst = _si_(jan1 <= date1 <= dec31, [date1], [])
-    lst += _si_(jan1 <= date2 <= dec31, [date2], [])
+    lst = [date1] if jan1 <= date1 <= dec31 else []
+    lst += [date2] if jan1 <= date2 <= dec31 else []
     return lst
 
 
@@ -567,8 +564,7 @@ def easter(g_year):
     """
     century = g_year // 100 + 1
     shifted_epact = (14 + 11 * (g_year % 19) - (3 * century) // 4 + (5 + 8 * century) // 25) % 30
-    adjusted_epact = _si_(shifted_epact == 0 or (shifted_epact == 1 and 10 < (g_year % 19)),
-                          shifted_epact + 1, shifted_epact)
+    adjusted_epact = shifted_epact + (1 if (shifted_epact == 0 or (shifted_epact == 1 and 10 < (g_year % 19))) else 0)
     paschal_moon = fixed_from_gregorian(GDate(_APRIL, 19, g_year)) - adjusted_epact
     return kday_after(paschal_moon, _SUNDAY)
 
@@ -608,9 +604,9 @@ _AL_NASI = 13
 class CDate:
     """Référence [2] pp. 37-55."""
 
-    def __init__(self, month, day, year):
+    def __init__(self, month, day, year, time=0.0):
         self.month = int(month)
-        self.day, self.time = outils.ent(day)
+        self.day, self.time = outils.ent(float(day + time))
         self.year = int(year)
 
     def __eq__(self, other):
@@ -621,7 +617,7 @@ class CDate:
                     and self.time == other.time)
 
     def __repr__(self):
-        return "CDate: [month={}, day={}, year={}, time={}]".format(self.month, self.day, self.year, self.time)
+        return "CDate({}, {}, {}, {})".format(self.month, self.day, self.year, self.time)
 
     def __str__(self):
         return "[Coptic: month={}, day={}, year={}, time={}]".format(self.month, self.day, self.year, self.time)
@@ -652,7 +648,7 @@ def coptic_from_fixed(date):
     year = (4 * (date - _COPTIC_EPOCH) + 1463) // 1461
     month = (date - fixed_from_coptic(CDate(1, 1, year))) // 30 + 1
     day = date + 1 - fixed_from_coptic(CDate(month, 1, year))
-    return CDate(month, day + time, year)
+    return CDate(month, day, year, time)
 
 
 # ETHIOPIC CALENDAR
@@ -668,9 +664,9 @@ _ETHIOPIC_EPOCH = 1723855
 class EDate:
     """Référence [2] pp. 59-60."""
 
-    def __init__(self, month, day, year):
+    def __init__(self, month, day, year, time=0.0):
         self.month = int(month)
-        self.day, self.time = outils.ent(day)
+        self.day, self.time = outils.ent(float(day + time))
         self.year = int(year)
 
     def __eq__(self, other):
@@ -681,7 +677,7 @@ class EDate:
                     and self.time == other.time)
 
     def __repr__(self):
-        return "EDate: [month={}, day={}, year={}, time={}]".format(self.month, self.day, self.year, self.time)
+        return "EDate({}, {}, {}, {})".format(self.month, self.day, self.year, self.time)
 
     def __str__(self):
         return "[Ethiopic: month={}, day={}, year={}, time={}]".format(self.month, self.day, self.year, self.time)
@@ -720,7 +716,7 @@ def ethiopic_from_fixed(date):
     Référence [2] (5.7) p. 59.
     """
     c_date = coptic_from_fixed(date + _COPTIC_EPOCH - _ETHIOPIC_EPOCH)
-    return EDate(c_date.month, c_date.day + c_date.time, c_date.year)
+    return EDate(c_date.month, c_date.day, c_date.year, c_date.time)
 
 
 def coptic_in_gregorian(c_month, c_day, g_year):
@@ -736,8 +732,8 @@ def coptic_in_gregorian(c_month, c_day, g_year):
     y = coptic_from_fixed(jan1).year
     date1 = fixed_from_coptic(CDate(c_month, c_day, y))
     date2 = fixed_from_coptic(CDate(c_month, c_day, y + 1))
-    lst = _si_(jan1 <= date1 <= dec31, [date1], [])
-    lst += _si_(jan1 <= date2 <= dec31, [date2], [])
+    lst = [date1] if jan1 <= date1 <= dec31 else []
+    lst += [date2] if jan1 <= date2 <= dec31 else []
     return lst
 
 
@@ -765,10 +761,38 @@ def ethiopic_in_gregorian(e_month, e_day, g_year):
     y = ethiopic_from_fixed(jan1).year
     date1 = fixed_from_ethiopic(EDate(e_month, e_day, y))
     date2 = fixed_from_ethiopic(EDate(e_month, e_day, y + 1))
-    lst = _si_(jan1 <= date1 <= dec31, [date1], [])
-    lst += _si_(jan1 <= date2 <= dec31, [date2], [])
+    lst = [date1] if jan1 <= date1 <= dec31 else []
+    lst += [date2] if jan1 <= date2 <= dec31 else []
     return lst
 
 
 if "__main__" == __name__:
     print("calendar")
+    d0 = fixed_from_gregorian(GDate(7, 14.25, 1789))
+    print(d0)
+    
+    g0 = gregorian_from_fixed(d0)
+    print(g0, repr(g0))
+    g = eval(repr(g0))
+    print(g, repr(g), g == g0, g is g0)
+
+    j0 = julian_from_fixed(d0)
+    print(j0, repr(j0))
+    j = eval(repr(j0))
+    print(j, repr(j), j == j0, j is j0)
+    
+    i0 = iso_from_fixed(d0)
+    print(i0, repr(i0))
+    i = eval(repr(i0))
+    print(i, repr(i), i == i0, i is i0)
+
+    c0 = coptic_from_fixed(d0)
+    print(c0, repr(c0))
+    c = eval(repr(c0))
+    print(c, repr(c), c == c0, c is c0)
+
+    e0 =  ethiopic_from_fixed(d0)
+    print(e0, repr(e0))
+    e = eval(repr(e0))
+    print(e, repr(e), e == e0, e is e0)
+

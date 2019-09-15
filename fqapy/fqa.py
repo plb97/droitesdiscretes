@@ -14,8 +14,8 @@ Bibliographie.
         disponible sur https://www.sciencedirect.com/science/article/pii/0304397593901219
 """
 
-# ATTENTION : La conversion systématique (et généralement silencieuse) des paramètres des fonctions
-#             au type attendu est faite par parti-pris.
+# ATTENTION : La conversion systématique (et normalement silencieuse) des paramètres des fonctions
+#             au types attendus est faite par parti-pris.
 
 import array
 from . import outils
@@ -135,10 +135,10 @@ class Fqa:
         return self.a == autre.a and self.b == autre.b and self.r == autre.r
 
     def __repr__(self):
-        return "Fqa : a={}, b={}, r={}".format(self.a, self.b, self.r)
+        return "Fqa(a={}, b={}, r={})".format(self.a, self.b, self.r)
 
     def __str__(self):
-        return "(a={}, b={}, r={})".format(self.a, self.b, self.r)
+        return "[a={}, b={}, r={}]".format(self.a, self.b, self.r)
 
     def divfqa(self, n_):
         """divfqa est l'équivalent de la division entière de n par la forme quasi affine self.
@@ -223,7 +223,7 @@ class Base:
         self.t.append(valeur)
 
     def __repr__(self):
-        return "Base : {}".format(self.t)
+        return "Base({})".format(self.t)
 
     def __str__(self):
         return "{}".format(self.t)
@@ -278,31 +278,23 @@ class Representation:
 
     def __repr__(self):
         # Le format d'une date peut (doit ?) dépendre de la base.
-        return "Representation : t={}".format(self.liste_entiers)
+        return "Representation({}, {})".format(self.base, self.liste_entiers)
 
     def __str__(self):
         return "{}".format(self.liste_entiers)
 
 
-class _BaseTemps(Base):
-    """Base temps [jours, heures, minutes, secondes]."""
-
-    def __init__(self):
-        super().__init__([
+BASE_TEMPS = Base([
             Fqa(86400, 1, 0),
             Fqa(3600, 1, 0),
             Fqa(60, 1, 0),
             Fqa(1, 1, 0),
         ])
 
-
-BASE_TEMPS = _BaseTemps()
-
 if "__main__" == __name__:
 
     # RAPPELS : les codes si définis par : c(x) = f(x+1) - f(x)
     print("fqa")
-
 
     # print()
     # print("les années")
@@ -460,7 +452,14 @@ if "__main__" == __name__:
     print("f", f, len(c))
     n = [f(i + 1) - f(i) for i in range(len(c))]
     print("n", n)
-    # f = Fqa(8, 25, 7)
-    # print("f", f)
-    # n = [f(i+1) - f(i) for i in range(len(c))]
-    # print("n", n)
+    f = Fqa(8, 25, 7)
+    print("f", f, repr(f))
+    f1 = eval(repr(f))
+    print(f1, f == f1, f1 is f)
+    n = [f(i+1) - f(i) for i in range(len(c))]
+    print("n", n)
+
+    print("BASE_TEMPS", BASE_TEMPS, repr(BASE_TEMPS), )
+    bt = eval(repr(BASE_TEMPS))
+    print("bt",bt, bt == BASE_TEMPS, bt is BASE_TEMPS)
+    

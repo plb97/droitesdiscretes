@@ -68,9 +68,10 @@ class Jours(IntEnum):
     # ELJOMOA = VENDREDI      ## الجمعة
     # ESSABAT = SAMEDI        ## السبت
     # ELAHAD = DIMANCHE       ## الأحد
+
     def __repr__(self):
         return "Jour de la semaine : {} {}".format(self.value, _JOURS[self.value])
-
+    
     def __str__(self):
         return _JOURS[self.value]
 
@@ -197,7 +198,7 @@ class Date:
     #             v un numéro de semaine dans l'année et w un numéro de jour dans
     #             la semaine.
     #             L'attribut t contient le temps (l'heure) extrait de w.
-    def __init__(self, u_, v_, w_, calendrier):
+    def __init__(self, calendrier, u_, v_, w_, t_=0.0):
         """Entrée : les trois paramètres u, v, w et le calendrier.
         Sortie : Le Date.
         Erreur : Si u ou v n'est pas un entier ou si w n'est pas un flottant ou un entier
@@ -207,9 +208,9 @@ class Date:
         # assert isinstance(v_, int)
         # assert (isinstance(w_, float) or isinstance(w_, int))
         assert isinstance(calendrier, Calendrier)
-        self.u, self.v = int(u_), int(v_)
-        self.w, self.t = outils.ent(w_)
         self.calendrier = calendrier
+        self.u, self.v = int(u_), int(v_)
+        self.w, self.t = outils.ent(float(w_ + t_))
 
     def __eq__(self, autre):
         if not isinstance(autre, Date):
@@ -224,10 +225,10 @@ class Date:
 
     def __repr__(self):
         # Le format d'une peut (doit ?) dépendre du calendrier.
-        return "Date : u={}, v={}, w={}, t={}".format(self.u, self.v, self.w, self.t)
+        return "Date({}, {}, {}, {}, {})".format(self.calendrier, self.u, self.v, self.w, self.t)
 
     def __str__(self):
-        return "({}, {}, {}, {})".format(self.u, str(self.v), self.w, self.t)
+        return "[{}, {}, {}, {}, {}]".format(self.calendrier, self.u, str(self.v), self.w, self.t)
 
 
 class _Quantite:
@@ -367,6 +368,7 @@ class JourJulien(_Quantite):
 #           comme pour le jour julien (Julian Day) en astronomie (jd = jj - 0.5).
 #           De ce point de vue cela se rapproche de la notion de 
 #           'Rata Die' (RD) [2] p. 9 même si l'origine n'est pas la même.
+# Origine = 0
 EPOQUE_JJ = JourJulien()
 # Par définition
 EPOQUE_JD = EPOQUE_JJ + 0.5
@@ -392,7 +394,7 @@ class Calendrier(fqa.Base):
     """Calendrier défini comme dans [1]."""
 
     def date_vers_jj(self, date: Date) -> JourJulien:
-        """Entrée : Une Date(u, v, w, t) représentant la date dans le calendrier.
+        """Entrée : Une Date(calendrier, u, v, w, t) représentant la date dans le calendrier.
         Sortie : le Jour julien correspondant.
         Erreur : Si le paramètre n'est pas une date.
         """
@@ -400,7 +402,7 @@ class Calendrier(fqa.Base):
 
     def date(self, jj: JourJulien):
         """Entrée : Un Jour julien.
-        Sortie : La Date(u, v, w, t) représentant le Jour julien dans le calendrier.
+        Sortie : La Date(calendrier, u, v, w, t) représentant le Jour julien dans le calendrier.
         Erreur : Si le paramètre n'est pas un Jour julien.
         """
         raise NotImplementedError("Méthode non implémentée.")
@@ -408,6 +410,9 @@ class Calendrier(fqa.Base):
     # TODO: formatage d'une date selon le calendrier
     # def format(self, jj):
     #    raise NotImplementedError("Méthode non implémentée.")
+
+    def __str__(self):
+        raise NotImplementedError("Méthode non implémentée.")
 
 
 class _CalendrierGre(Calendrier):
@@ -422,7 +427,7 @@ class _CalendrierGre(Calendrier):
         ])
 
     def date_vers_jj(self, date):
-        """Entrée : Une Date(a, m, j, t) représentant la date dans le calendrier.
+        """Entrée : Une Date(calendrier, a, m, j, t) représentant la date dans le calendrier.
         Sortie : le Jour julien correspondant.
         Erreur : Si le paramètre n'est pas une date.
         """
@@ -436,14 +441,17 @@ class _CalendrierGre(Calendrier):
 
     def date(self, jj_):
         """Entrée : Un Jour julien.
-        Sortie : La Date(a, m, j, t) représentant le Jour julien dans le calendrier.
+        Sortie : La Date(calendrier, a, m, j, t) représentant le Jour julien dans le calendrier.
         Erreur : Si le paramètre n'est pas un Jour julien.
         """
         assert isinstance(jj_, JourJulien)
         dt_ = super().inv(jj_.n)
         a_, m_ = _dnorm_am(100 * dt_[0] + dt_[1], dt_[2])
         j_ = dt_[3]
-        return Date(a_, Mois(m_), j_ + jj_.f, self)
+        return Date(self, a_, Mois(m_), j_, jj_.f)
+
+    def __str__(self):
+        return "CALENDRIER_GRE"
 
 
 CALENDRIER_GRE = _CalendrierGre()
@@ -460,7 +468,7 @@ class _CalendrierJul(Calendrier):
         ])
 
     def date_vers_jj(self, date):
-        """Entrée : Une Date(a, m, j, t) représentant la date dans le calendrier.
+        """Entrée : Une Date(calendrier, a, m, j, t) représentant la date dans le calendrier.
         Sortie : le Jour julien correspondant.
         Erreur : Si le paramètre n'est pas une date.
         """
@@ -473,14 +481,17 @@ class _CalendrierJul(Calendrier):
 
     def date(self, jj_):
         """Entrée : Un Jour julien.
-        Sortie : La Date(a, m, j, t) représentant le Jour julien dans le calendrier.
+        Sortie : La Date(calendrier, a, m, j, t) représentant le Jour julien dans le calendrier.
         Erreur : Si le paramètre n'est pas un Jour julien.
         """
         assert isinstance(jj_, JourJulien)
         dt_ = super().inv(jj_.n)
         a_, m_ = _dnorm_am(dt_[0], dt_[1])
         j_ = dt_[2]
-        return Date(a_, Mois(m_), j_ + jj_.f, self)
+        return Date(self, a_, Mois(m_), j_, jj_.f)
+
+    def __str__(self):
+        return "CALENDRIER_JUL"
 
 
 CALENDRIER_JUL = _CalendrierJul()
@@ -497,7 +508,7 @@ class _CalendrierIsl(Calendrier):
         ])
 
     def date_vers_jj(self, date):
-        """Entrée : Une Date(a, m, j, t) représentant la date dans le calendrier.
+        """Entrée : Une Date(calendrier, a, m, j, t) représentant la date dans le calendrier.
         Sortie : le Jour julien correspondant.
         Erreur : Si le paramètre n'est pas une date.
         """
@@ -516,7 +527,10 @@ class _CalendrierIsl(Calendrier):
         assert isinstance(jj_, JourJulien)
         dt_ = super().inv(jj_.n)
         a_, m_, j_ = dt_[0], dt_[1], dt_[2]
-        return Date(a_, m_, j_ + jj_.f, self)
+        return Date(self, a_, m_, j_, jj_.f)
+
+    def __str__(self):
+        return "CALENDRIER_ISL"
 
 
 CALENDRIER_ISL = _CalendrierIsl()
@@ -529,7 +543,7 @@ if "__main__" == __name__:
 
     # a, m, j = 1,3,1
 
-    # JUL1MARS =  Date(a, m, j, CALENDRIER_JUL)()()
+    # JUL1MARS =  Date(CALENDRIER_JUL, a, m, j)()()
     # print("JUL0", JUL0, "JUL1MARS", JUL1MARS, JUL1MARS - JUL0)
 
     # jul = lambda a, m, j : int((365.25 * a) // 1) + int((30.6 * (m + 1)) // 1) + j + 1720994.5
@@ -551,20 +565,66 @@ if "__main__" == __name__:
     print()
     j = 1
     for i in range(5):
-        print()
         a = i + 1
-        m = 1
-        dt0 = Date(a, m, j, CALENDRIER_JUL)
+
+        print()
+        m = 1        
+        dt0 = Date(CALENDRIER_JUL, a, m, j)
         print("a m j", a, m, j)
-        print("dt0", dt0, dt0())
+        print("dt0", dt0, dt0(), repr(dt0))
+        dt1 = eval(repr(dt0))
+        print("dt1", dt1, dt0 == dt1, dt0 is dt1)
         u, v = _norm_am(a, m)
         print("a m j", u, v, j)
 
         print()
         m = 3
-        dt = Date(a, m, j, CALENDRIER_JUL)
+        dt = Date(CALENDRIER_JUL, a, m, j)
         print("a m j", a, m, j)
         print("dt", dt, dt())
         u, v = _norm_am(a, m)
         print("a m j", u, v, j)
         print("*** dt-dt0", dt() - dt0())
+
+        print()
+        m = 1        
+        dt0 = Date(CALENDRIER_GRE, a, m, j)
+        print("a m j", a, m, j)
+        print("dt0", dt0, dt0(), repr(dt0))
+        dt1 = eval(repr(dt0))
+        print("dt1", dt1, dt0 == dt1, dt0 is dt1)
+        u, v = _norm_am(a, m)
+        print("a m j", u, v, j)
+
+        print()
+        m = 3
+        dt = Date(CALENDRIER_GRE, a, m, j)
+        print("a m j", a, m, j)
+        print("dt", dt, dt())
+        u, v = _norm_am(a, m)
+        print("a m j", u, v, j)
+        print("*** dt-dt0", dt() - dt0())
+
+        print()
+        m = 1        
+        dt0 = Date(CALENDRIER_ISL, a, m, j)
+        print("a m j", a, m, j)
+        print("dt0", dt0, dt0(), repr(dt0))
+        dt1 = eval(repr(dt0))
+        print("dt1", dt1, dt0 == dt1, dt0 is dt1)
+        u, v = _norm_am(a, m)
+        print("a m j", u, v, j)
+
+        print()
+        m = 3
+        dt = Date(CALENDRIER_ISL, a, m, j)
+        print("a m j", a, m, j)
+        print("dt", dt, dt())
+        u, v = _norm_am(a, m)
+        print("a m j", u, v, j)
+        print("*** dt-dt0", dt() - dt0())
+
+    print()
+    print(Jours.LUNDI, repr(Jours.LUNDI))
+    print(Days.MONDAY, repr(Days.MONDAY))
+
