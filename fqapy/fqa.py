@@ -48,24 +48,23 @@ def reconnaissance(liste_codes):
         # caractère isolé
         ci = {True: "0", False: "1"}[complement_]
         # le palier terminal est complet s'il s'achève par le caractère isolé (sc[-1] == ci)
-        complet = sc[-1] == ci
+        dp = 1 if sc[-1] == ci else 0
         # symétrie (longueurs des paliers caractère isolé inclus)
-        tl_ = [len(c_) + 1 for c_ in sc[:len(sc) - {True: 1, False: 0}[complet]].split(ci)]
+        tl_ = [len(c_) + 1 for c_ in sc[:len(sc) - dp].split(ci)]
         # plus petit palier
         # REMARQUE : si le dernier palier est complet il faut le prendre en considération
-        dp = 0 if complet else 1
-        if 1 + dp < len(tl_):
+        if 2 - dp < len(tl_):
             # plus petit palier interne (éventuellement le dernier s'il est complet)
-            mini = min(tl_[1:len(tl_) - dp])
+            mini = min(tl_[1:len(tl_) - 1 + dp])
         else:
             # sinon le plus petit palier externe (ou le dernier s'il est complet)
-            mini = tl_[1 - dp:len(tl_) - 1 + dp]
+            mini = tl_[dp:]
         # translation
         g_ = 0
         if 1 < len(tl_) and tl_[0] <= mini:
             g_ = tl_[0]
             del tl_[0]
-        if 1 < len(tl_) and tl_[-1] <= mini and not complet:
+        if 1 < len(tl_) and tl_[-1] <= mini and 0 == dp:
             del tl_[-1]
         return tl_, p_, g_, complement_
 
