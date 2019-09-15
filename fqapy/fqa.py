@@ -52,12 +52,14 @@ def reconnaissance(liste_codes):
         # symétrie (longueurs des paliers caractère isolé inclus)
         tl_ = [len(c_) + 1 for c_ in sc[:len(sc) - {True: 1, False: 0}[complet]].split(ci)]
         # plus petit palier
-        if 2 < len(tl_):
-            # plus petit palier interne (strictement)
-            mini = min(tl_[1:-1])
+        # REMARQUE : si le dernier palier est complet il faut le prendre en considération
+        dp = 0 if complet else 1
+        if 1 + dp < len(tl_):
+            # plus petit palier interne (éventuellement le dernier s'il est complet)
+            mini = min(tl_[1:len(tl_) - dp])
         else:
-            # sinon plus petit palier externe
-            mini = min(tl_)
+            # sinon le plus petit palier externe (ou le dernier s'il est complet)
+            mini = tl_[1 - dp:len(tl_) - 1 + dp]
         # translation
         g_ = 0
         if 1 < len(tl_) and tl_[0] <= mini:
