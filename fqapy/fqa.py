@@ -43,28 +43,30 @@ def reconnaissance(liste_codes):
                              list(map(lambda c_: c_ - p_, lc[:-1]))))
         if "*" in sc:
             raise ValueError("Liste de codes invalide")
-        # complémentation (si 1 n'est pas le caractère isolé)
+        # complémentation (si "1" n'est pas le caractère isolé)
         complement_ = "11" in sc
         # caractère isolé
         ci = {True: "0", False: "1"}[complement_]
-        # le palier terminal est complet s'il s'achève par le caractère isolé (sc[-1] == ci)
-        dp = 1 if sc[-1] == ci else 0
+        # le palier terminal est complet (dp=0) s'il s'achève par le caractère isolé (sc[-1] == ci)
+        dp = 0 if sc[-1] == ci else 1
         # symétrie (longueurs des paliers caractère isolé inclus)
-        tl_ = [len(c_) + 1 for c_ in sc[:len(sc) - dp].split(ci)]
+        tl_ = [len(c_) + 1 for c_ in sc[:len(sc) - 1 + dp].split(ci)]
         # plus petit palier
-        # REMARQUE : si le dernier palier est complet il faut le prendre en considération
-        if 2 - dp < len(tl_):
-            # plus petit palier interne (éventuellement le dernier s'il est complet)
-            mini = min(tl_[1:len(tl_) - 1 + dp])
+        # REMARQUE : si le dernier palier est complet (dp=0) il faut le prendre en considération
+        if 1 + dp < len(tl_):
+            # plus petit palier interne incluant éventuellement le dernier s'il est complet (dp=0)
+            mini = min(tl_[1:len(tl_) - dp])
         else:
-            # sinon le plus petit palier externe (ou le dernier s'il est complet)
-            mini = tl_[dp:]
+            # sinon le plus petit palier externe
+            mini = min(tl_)
         # translation
         g_ = 0
+        # suppression du premier palier s'il est plus petit ou égal au mini
         if 1 < len(tl_) and tl_[0] <= mini:
             g_ = tl_[0]
             del tl_[0]
-        if 1 < len(tl_) and tl_[-1] <= mini and 0 == dp:
+        # suppression du dernier palier s'il est plus petit ou égal au mini et s'il n'est pas complet (dp=1)
+        if 1 < len(tl_) and tl_[-1] <= mini and 1 == dp:
             del tl_[-1]
         return tl_, p_, g_, complement_
 
